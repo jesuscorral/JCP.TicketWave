@@ -1,5 +1,7 @@
-using JCP.TicketWave.BookingService.Features.Bookings;
-using JCP.TicketWave.BookingService.Features.Tickets;
+using JCP.TicketWave.BookingService.Features.Bookings.CreateBooking;
+using JCP.TicketWave.BookingService.Features.Bookings.GetBooking;
+using JCP.TicketWave.BookingService.Features.Tickets.ReserveTickets;
+using JCP.TicketWave.BookingService.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,9 +23,9 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // Register handlers for dependency injection
-builder.Services.AddScoped<CreateBooking.Handler>();
-builder.Services.AddScoped<GetBooking.Handler>();
-builder.Services.AddScoped<ReserveTickets.Handler>();
+builder.Services.AddScoped<CreateBookingHandler>();
+builder.Services.AddScoped<GetBookingHandler>();
+builder.Services.AddScoped<ReserveTicketsHandler>();
 
 // Add CORS for microservices communication
 builder.Services.AddCors(options =>
@@ -49,9 +51,9 @@ app.UseHttpsRedirection();
 app.UseCors();
 
 // Map feature endpoints
-CreateBooking.MapEndpoint(app);
-GetBooking.MapEndpoint(app);
-ReserveTickets.MapEndpoint(app);
+BookingController.MapEndpoint(app);
+GetBookingController.MapEndpoint(app);
+ReserveTicketsController.MapEndpoint(app);
 
 // Health check endpoint
 app.MapGet("/health", () => Results.Ok(new { Status = "Healthy", Service = "BookingService" }))

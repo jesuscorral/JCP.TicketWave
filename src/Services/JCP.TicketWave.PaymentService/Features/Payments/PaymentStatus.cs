@@ -1,8 +1,11 @@
-public enum PaymentStatus
+namespace JCP.TicketWave.PaymentService.Features.Payments
 {
-    Pending,
-    Processing,
-    Succeeded,
-    Failed,
-    Cancelled
+    public enum PaymentStatus
+    {
+        Pending,
+        Processing,
+        Succeeded,
+        Failed,
+        Cancelled
+    }
 }

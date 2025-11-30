@@ -2,7 +2,7 @@ using JCP.TicketWave.CatalogService.Features.Categories.GetCategories;
 
 namespace JCP.TicketWave.CatalogService.Controllers;
 
-public static class GetCategoriesController
+public static class CategoriesController
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {

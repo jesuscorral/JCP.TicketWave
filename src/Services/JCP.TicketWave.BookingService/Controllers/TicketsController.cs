@@ -3,7 +3,7 @@ using JCP.TicketWave.BookingService.Features.Tickets.ReserveTickets;
 
 namespace JCP.TicketWave.BookingService.Controllers;
 
-public static class ReserveTicketsController
+public static class TicketsController
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {

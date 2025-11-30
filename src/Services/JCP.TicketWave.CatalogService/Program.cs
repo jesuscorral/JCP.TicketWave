@@ -51,9 +51,8 @@ app.UseHttpsRedirection();
 app.UseCors();
 
 // Map feature endpoints
-GetEventsController.MapEndpoint(app);
-GetEventByIdController.MapEndpoint(app);
-GetCategoriesController.MapEndpoint(app);
+EventsController.MapEndpoint(app);
+CategoriesController.MapEndpoint(app);
 
 // Health check endpoint
 app.MapGet("/health", () => Results.Ok(new { Status = "Healthy", Service = "CatalogService" }))

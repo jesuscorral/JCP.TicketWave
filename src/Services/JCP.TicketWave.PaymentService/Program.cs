@@ -1,5 +1,7 @@
-using JCP.TicketWave.PaymentService.Features.Payments;
-using JCP.TicketWave.PaymentService.Features.Refunds;
+using JCP.TicketWave.PaymentService.Features.Payments.ProcessPayment;
+using JCP.TicketWave.PaymentService.Features.Payments.GetPaymentStatus;
+using JCP.TicketWave.PaymentService.Features.Refunds.ProcessRefund;
+using JCP.TicketWave.PaymentService.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,9 +23,9 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // Register handlers for dependency injection
-builder.Services.AddScoped<ProcessPayment.Handler>();
-builder.Services.AddScoped<GetPaymentStatus.Handler>();
-builder.Services.AddScoped<ProcessRefund.Handler>();
+builder.Services.AddScoped<ProcessPaymentHandler>();
+builder.Services.AddScoped<GetPaymentStatusHandler>();
+builder.Services.AddScoped<ProcessRefundHandler>();
 
 // Add CORS for microservices communication
 builder.Services.AddCors(options =>
@@ -49,9 +51,8 @@ app.UseHttpsRedirection();
 app.UseCors();
 
 // Map feature endpoints
-ProcessPayment.MapEndpoint(app);
-GetPaymentStatus.MapEndpoint(app);
-ProcessRefund.MapEndpoint(app);
+PaymentsController.MapEndpoint(app);
+RefundsController.MapEndpoint(app);
 
 // Health check endpoint
 app.MapGet("/health", () => Results.Ok(new { Status = "Healthy", Service = "PaymentService" }))

@@ -52,8 +52,7 @@ app.UseCors();
 
 // Map feature endpoints
 BookingController.MapEndpoint(app);
-GetBookingController.MapEndpoint(app);
-ReserveTicketsController.MapEndpoint(app);
+TicketsController.MapEndpoint(app);
 
 // Health check endpoint
 app.MapGet("/health", () => Results.Ok(new { Status = "Healthy", Service = "BookingService" }))

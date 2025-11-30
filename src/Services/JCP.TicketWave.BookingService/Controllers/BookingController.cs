@@ -16,8 +16,8 @@ public static class BookingController
            var result = await handler.Handle(command, cancellationToken);
            return Results.Created($"/api/bookings/{result.BookingId}", result);
        })
-       .WithTags("Bookings")
-       .WithSummary("Create a new booking");
+        .WithTags("Bookings")
+        .WithSummary("Create a new booking");
         
         app.MapGet("/api/bookings/{bookingId:guid}", async (
             Guid bookingId,

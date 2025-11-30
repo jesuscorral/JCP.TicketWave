@@ -19,12 +19,26 @@ public class ProcessRefundHandler
         // Simulate refund processing
         var isSuccessful = Random.Shared.Next(1, 11) > 1; // 90% success rate
         
+        // Simulate specific failure reasons
+        string? failureReason = null;
+        if (!isSuccessful)
+        {
+            if (command.Amount.HasValue && command.Amount.Value <= 0)
+                failureReason = "Refund amount must be greater than zero.";
+            else if (command.Amount.HasValue && command.Amount.Value > 1000)
+                failureReason = "Refund amount exceeds allowed limit.";
+            else if (Random.Shared.Next(0, 2) == 0)
+                failureReason = "Refund period expired.";
+            else
+                failureReason = "Payment method does not support refunds.";
+        }
+        
         return new ProcessRefundResponse(
             RefundId: refundId,
             RefundIntentId: refundIntentId,
             RefundAmount: refundAmount,
             Status: isSuccessful ? RefundStatus.Succeeded : RefundStatus.Failed,
             ProcessedAt: DateTime.UtcNow,
-            FailureReason: isSuccessful ? null : "Refund not allowed for this payment");
+            FailureReason: isSuccessful ? null : failureReason);
     }
 }

@@ -1,0 +1,6 @@
+@JCP.TicketWave.BookingService_HostAddress = http://localhost:5269
+
+GET {{JCP.TicketWave.BookingService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,6 @@
+@JCP.TicketWave.PaymentService_HostAddress = http://localhost:5146
+
+GET {{JCP.TicketWave.PaymentService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

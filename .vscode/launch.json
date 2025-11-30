@@ -1,0 +1,225 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Gateway (Run & Debug)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-gateway",
+            "program": "${workspaceFolder}/src/Gateway/JCP.TicketWave.Gateway/bin/Debug/net10.0/JCP.TicketWave.Gateway.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Gateway/JCP.TicketWave.Gateway",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "justMyCode": false,
+            "exceptionOptions": {
+                "System.Exception": "always"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "https://localhost:7299;http://localhost:5119"
+            }
+        },
+        {
+            "name": "Gateway (Run Only)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-gateway",
+            "program": "${workspaceFolder}/src/Gateway/JCP.TicketWave.Gateway/bin/Debug/net10.0/JCP.TicketWave.Gateway.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Gateway/JCP.TicketWave.Gateway",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "justMyCode": false,
+            "enableStepFiltering": false,
+            "suppressJITOptimizations": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "https://localhost:7299;http://localhost:5119"
+            }
+        },
+        {
+            "name": "Booking Service (Run & Debug)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-booking",
+            "program": "${workspaceFolder}/src/Services/JCP.TicketWave.BookingService/bin/Debug/net10.0/JCP.TicketWave.BookingService.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Services/JCP.TicketWave.BookingService",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "justMyCode": false,
+            "exceptionOptions": {
+                "System.Exception": "always"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "https://localhost:7279;http://localhost:5269"
+            }
+        },
+        {
+            "name": "Booking Service (Run Only)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-booking",
+            "program": "${workspaceFolder}/src/Services/JCP.TicketWave.BookingService/bin/Debug/net10.0/JCP.TicketWave.BookingService.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Services/JCP.TicketWave.BookingService",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "justMyCode": false,
+            "enableStepFiltering": false,
+            "suppressJITOptimizations": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "https://localhost:7279;http://localhost:5269"
+            }
+        },
+        {
+            "name": "Catalog Service (Run & Debug)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-catalog",
+            "program": "${workspaceFolder}/src/Services/JCP.TicketWave.CatalogService/bin/Debug/net10.0/JCP.TicketWave.CatalogService.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Services/JCP.TicketWave.CatalogService",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "justMyCode": false,
+            "exceptionOptions": {
+                "System.Exception": "always"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "https://localhost:7008;http://localhost:5217"
+            }
+        },
+        {
+            "name": "Catalog Service (Run Only)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-catalog",
+            "program": "${workspaceFolder}/src/Services/JCP.TicketWave.CatalogService/bin/Debug/net10.0/JCP.TicketWave.CatalogService.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Services/JCP.TicketWave.CatalogService",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "justMyCode": false,
+            "enableStepFiltering": false,
+            "suppressJITOptimizations": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "https://localhost:7008;http://localhost:5217"
+            }
+        },
+        {
+            "name": "Payment Service (Run & Debug)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-payment",
+            "program": "${workspaceFolder}/src/Services/JCP.TicketWave.PaymentService/bin/Debug/net10.0/JCP.TicketWave.PaymentService.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Services/JCP.TicketWave.PaymentService",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "justMyCode": false,
+            "exceptionOptions": {
+                "System.Exception": "always"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "https://localhost:7021;http://localhost:5146"
+            }
+        },
+        {
+            "name": "Payment Service (Run Only)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-payment",
+            "program": "${workspaceFolder}/src/Services/JCP.TicketWave.PaymentService/bin/Debug/net10.0/JCP.TicketWave.PaymentService.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Services/JCP.TicketWave.PaymentService",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "justMyCode": false,
+            "enableStepFiltering": false,
+            "suppressJITOptimizations": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "https://localhost:7021;http://localhost:5146"
+            }
+        },
+        {
+            "name": "Notification Service (Run & Debug)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-notification",
+            "program": "${workspaceFolder}/src/Services/JCP.TicketWave.NotificationService/bin/Debug/net10.0/JCP.TicketWave.NotificationService.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Services/JCP.TicketWave.NotificationService",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "justMyCode": false,
+            "exceptionOptions": {
+                "System.Exception": "always"
+            },
+            "env": {
+                "DOTNET_ENVIRONMENT": "Development"
+            }
+        },
+        {
+            "name": "Notification Service (Run Only)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-notification",
+            "program": "${workspaceFolder}/src/Services/JCP.TicketWave.NotificationService/bin/Debug/net10.0/JCP.TicketWave.NotificationService.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Services/JCP.TicketWave.NotificationService",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "justMyCode": false,
+            "enableStepFiltering": false,
+            "suppressJITOptimizations": false,
+            "env": {
+                "DOTNET_ENVIRONMENT": "Development"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "All Services (Run & Debug)",
+            "configurations": [
+                "Gateway (Run & Debug)",
+                "Booking Service (Run & Debug)", 
+                "Catalog Service (Run & Debug)",
+                "Payment Service (Run & Debug)",
+                "Notification Service (Run & Debug)"
+            ],
+            "stopAll": true,
+            "presentation": {
+                "hidden": false,
+                "group": "TicketWave Debug",
+                "order": 1
+            }
+        },
+        {
+            "name": "All Services (Run Only)",
+            "configurations": [
+                "Gateway (Run Only)",
+                "Booking Service (Run Only)", 
+                "Catalog Service (Run Only)",
+                "Payment Service (Run Only)",
+                "Notification Service (Run Only)"
+            ],
+            "stopAll": true,
+            "presentation": {
+                "hidden": false,
+                "group": "TicketWave Run",
+                "order": 2
+            }
+        }
+    ]
+}

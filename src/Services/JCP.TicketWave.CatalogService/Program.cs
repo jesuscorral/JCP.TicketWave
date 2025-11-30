@@ -1,5 +1,7 @@
-using JCP.TicketWave.CatalogService.Features.Events;
-using JCP.TicketWave.CatalogService.Features.Categories;
+using JCP.TicketWave.CatalogService.Features.Events.GetEvents;
+using JCP.TicketWave.CatalogService.Features.Events.GetEventById;
+using JCP.TicketWave.CatalogService.Features.Categories.GetCategories;
+using JCP.TicketWave.CatalogService.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,9 +23,9 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // Register handlers for dependency injection
-builder.Services.AddScoped<GetEvents.Handler>();
-builder.Services.AddScoped<GetEventById.Handler>();
-builder.Services.AddScoped<GetCategories.Handler>();
+builder.Services.AddScoped<GetEventsHandler>();
+builder.Services.AddScoped<GetEventByIdHandler>();
+builder.Services.AddScoped<GetCategoriesHandler>();
 
 // Add CORS for microservices communication
 builder.Services.AddCors(options =>
@@ -49,9 +51,8 @@ app.UseHttpsRedirection();
 app.UseCors();
 
 // Map feature endpoints
-GetEvents.MapEndpoint(app);
-GetEventById.MapEndpoint(app);
-GetCategories.MapEndpoint(app);
+EventsController.MapEndpoint(app);
+CategoriesController.MapEndpoint(app);
 
 // Health check endpoint
 app.MapGet("/health", () => Results.Ok(new { Status = "Healthy", Service = "CatalogService" }))

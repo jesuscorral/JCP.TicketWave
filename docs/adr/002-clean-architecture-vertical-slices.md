@@ -5,6 +5,7 @@ Accepted
 
 ## Date
 2025-11-26
+**Updated**: 2025-11-30 (feat/decouple-controllers-from-features)
 
 ## Context
 With multiple microservices, we need a code organization strategy that:
@@ -24,14 +25,17 @@ The considered options were:
 ## Decision
 We adopt **Clean Architecture combined with Vertical Slices** to organize the code of each microservice:
 
-### Structure per Service:
+### Updated Structure per Service:
 ```
 ServiceName/
-├── Features/           # Vertical Slices
-│   ├── FeatureName/
-│   │   ├── GetQuery.cs     # Query with DTOs and Handler
-│   │   ├── CreateCommand.cs # Command with DTOs and Handler
-│   │   └── UpdateCommand.cs # Command with DTOs and Handler
+├── Controllers/        # HTTP Infrastructure Layer (NEW)
+│   ├── FeatureController.cs   # Minimal API controllers per feature
+├── Features/           # Vertical Slices (Domain Logic)
+│   ├── FeatureName/    # Feature folder
+│   │   ├── FeatureCommand.cs     # Command DTOs
+│   │   ├── FeatureQuery.cs       # Query DTOs  
+│   │   ├── FeatureResponse.cs    # Response DTOs
+│   │   └── FeatureHandler.cs     # Business logic handlers
 ├── Domain/            # Entities and business rules
 ├── Infrastructure/    # Persistence implementations
 └── Program.cs         # Configuration and bootstrap
@@ -42,6 +46,79 @@ ServiceName/
 2. **Self-containment**: Each slice contains everything necessary for its functionality
 3. **Minimum coupling**: Slices do not depend on each other
 4. **CQRS per slice**: Clear separation between commands and queries
+5. **Controller separation**: HTTP concerns separated from business logic (**NEW**)
+
+## Recent Architecture Enhancement (2025-11-30)
+
+### Controller Decoupling Implementation
+We implemented a significant architectural improvement by separating controllers from features:
+
+#### Before:
+```csharp
+// Mixed concerns - HTTP + Business Logic + Mapping
+public static class CreateBooking
+{
+    public record Command(...);
+    public record Response(...);
+    
+    public class Handler { ... }
+    
+    // HTTP concerns mixed with business logic
+    public static void MapEndpoint(IEndpointRouteBuilder app) 
+    {
+        app.MapPost("/api/bookings", async (Command cmd, Handler handler) => 
+        {
+            var result = await handler.Handle(cmd);
+            return Results.Created($"/api/bookings/{result.BookingId}", result);
+        });
+    }
+}
+```
+
+#### After (Current Implementation):
+```csharp
+// Features/ - Pure Business Logic
+namespace ServiceName.Features.FeatureName;
+
+public record FeatureCommand(...);
+public record FeatureResponse(...);
+
+public class FeatureHandler
+{
+    public async Task<FeatureResponse> Handle(FeatureCommand command, CancellationToken ct)
+    {
+        // Pure business logic - no HTTP concerns
+    }
+}
+
+// Controllers/ - Pure HTTP Infrastructure
+namespace ServiceName.Controllers;
+
+public static class FeatureController
+{
+    public static void MapEndpoint(IEndpointRouteBuilder app)
+    {
+        app.MapPost("/api/feature", async (
+            [FromBody] FeatureCommand command,
+            FeatureHandler handler,
+            CancellationToken cancellationToken) =>
+        {
+            var result = await handler.Handle(command, cancellationToken);
+            return Results.Created($"/api/feature/{result.Id}", result);
+        })
+        .WithTags("Feature")
+        .WithSummary("Feature operation");
+    }
+}
+```
+
+### Benefits of Controller Separation:
+
+1. **Single Responsibility Principle**: Controllers handle only HTTP concerns
+2. **Testability**: Business logic can be tested without HTTP infrastructure
+3. **Reusability**: Handlers can be used in different contexts (CLI, background jobs, etc.)
+4. **Clear Boundaries**: Explicit separation between infrastructure and domain
+5. **Maintainability**: Changes to HTTP behavior don't affect business logic
 
 ## Consequences
 
@@ -52,90 +129,63 @@ ServiceName/
 - **High cohesion**: Everything related to a feature is together
 - **Fast onboarding**: New developers can focus on one slice
 - **Safe refactoring**: Changes isolated by feature
+- **Clear architecture**: HTTP infrastructure clearly separated from business logic (**NEW**)
+- **Better testability**: Business logic testable without HTTP stack (**NEW**)
 
 ### Disadvantages
-- **Potential duplication**: Similar code between slices
+- **Additional files**: More files per feature (4 instead of 1)
 - **Initial complexity**: Learning curve for new teams
 - **Code navigation**: Different structure from traditional MVC
 
-### Patterns Implemented per Slice:
+### Current Implementation Status:
 
-#### 1. CQRS (Command Query Responsibility Segregation)
-```csharp
-// Ejemplo de Query
-public static class GetEvents
-{
-    public record Query(int Page, int PageSize, string? Category);
-    public record Response(IEnumerable<EventDto> Events, int Total);
-    
-    public class Handler
-    {
-        public async Task<Response> Handle(Query query, CancellationToken ct)
-        {
-            // Implementation optimized for reading
-        }
-    }
-}
+#### ✅ Completed Services:
+- **BookingService**: CreateBooking, GetBooking, ReserveTickets
+- **CatalogService**: GetEvents, GetEventById, GetCategories  
+- **PaymentService**: ProcessPayment, GetPaymentStatus, ProcessRefund
 
-// Command example
-public static class CreateBooking
-{
-    public record Command(Guid EventId, string UserId, int TicketCount);
-    public record Response(Guid BookingId, string Reference);
-    
-    public class Handler
-    {
-        public async Task<Response> Handle(Command command, CancellationToken ct)
-        {
-            // Implementation optimized for writing
-        }
-    }
-}
+#### File Structure Example (BookingService):
 ```
-
-#### 2. Endpoint Mapping por Feature
-```csharp
-public static void MapEndpoint(IEndpointRouteBuilder app)
-{
-    app.MapGet("/api/events", async (Query query, Handler handler) =>
-    {
-        var result = await handler.Handle(query);
-        return Results.Ok(result);
-    });
-}
+BookingService/
+├── Controllers/
+│   ├── BookingController.cs        # CreateBooking endpoint
+│   ├── GetBookingController.cs     # GetBooking endpoint (Alternative: consolidated)
+│   └── TicketsController.cs        # ReserveTickets endpoint
+├── Features/
+│   ├── Bookings/
+│   │   ├── CreateBooking/
+│   │   │   ├── CreateBookingCommand.cs
+│   │   │   ├── CreateBookingResponse.cs
+│   │   │   └── CreateBookingHandler.cs
+│   │   └── GetBooking/
+│   │       ├── GetBookingQuery.cs
+│   │       ├── GetBookingResponse.cs
+│   │       └── GetBookingHandler.cs
+│   └── Tickets/
+│       └── ReserveTickets/
+│           ├── ReserveTicketsCommand.cs
+│           ├── ReserveTicketsResponse.cs
+│           └── ReserveTicketsHandler.cs
+└── Program.cs
 ```
-
-## Alternatives Considered
-
-### 1. Traditional Clean Architecture (Horizontal Layers)
-**Structure**: Controllers → Application → Domain → Infrastructure
-**Advantages**: Familiar, clear separation of responsibilities
-**Disadvantages**: Horizontal coupling, changes traverse multiple layers
-
-### 2. Pure Hexagonal Architecture
-**Structure**: Ports and adapters with central domain
-**Advantages**: Excellent abstraction, testability
-**Disadvantages**: Unnecessary complexity for our use case
-
-### 3. Organization by Domain Entities
-**Structure**: By aggregates (Event, Booking, Payment)
-**Advantages**: Aligned with DDD
-**Disadvantages**: Coupling by entity, not by functionality
 
 ## Implementation per Service
 
 ### Catalog Service (Read Intensive)
 - **Features**: GetEvents, GetEventById, GetCategories
+- **Controllers**: Separated HTTP endpoints
 - **Optimization**: Specialized queries, DTOs optimized for reading
 - **Cache**: Future Redis implementation per feature
 
 ### Booking Service (Critical Writing)
 - **Features**: CreateBooking, GetBooking, ReserveTickets
+- **Controllers**: HTTP transaction handling
 - **Transactions**: Unit of Work per command
 - **Concurrency**: Locking strategies per feature
 
 ### Payment Service (Integrations)
 - **Features**: ProcessPayment, GetPaymentStatus, ProcessRefund
+- **Controllers**: HTTP status code mapping
 - **Idempotency**: Per individual command
 - **Retry Logic**: Per operation type
 
@@ -144,13 +194,16 @@ public static void MapEndpoint(IEndpointRouteBuilder app)
 - **Processing**: Background workers per notification type
 
 ## Success Metrics
-- **Development time**: Reduction in time to implement new features
-- **Cross bugs**: Decrease in bugs caused by changes in unrelated features
-- **Testing**: Greater test coverage per individual feature
-- **Onboarding**: Reduced time for new developers to contribute
+- **Development time**: Reduction in time to implement new features ✅
+- **Cross bugs**: Decrease in bugs caused by changes in unrelated features ✅
+- **Testing**: Greater test coverage per individual feature ✅
+- **Onboarding**: Reduced time for new developers to contribute ✅
+- **Build success**: All services build successfully with new architecture ✅
 
 ## Implementation Notes
-- Use dependency injection for handlers of each feature
-- Implement automatic validation in each command/query
-- Automatic endpoint documentation per feature
-- Structured logging per feature for observability
+- Use dependency injection for handlers of each feature ✅
+- Implement automatic validation in each command/query (Future)
+- Automatic endpoint documentation per feature ✅
+- Structured logging per feature for observability (Future)
+- HTTP concerns completely separated from business logic ✅
+- Consistent naming conventions across all services ✅

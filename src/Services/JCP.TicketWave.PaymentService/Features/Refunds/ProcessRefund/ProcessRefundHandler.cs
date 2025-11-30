@@ -12,7 +12,9 @@ public class ProcessRefundHandler
         
         var refundId = Guid.NewGuid();
         var refundIntentId = $"re_{Guid.NewGuid():N}";
-        var refundAmount = command.Amount ?? 100.00m; // Default amount for demo
+        // Use the provided refund amount, or retrieve the full payment amount from the original transaction if null.
+        var refundAmount = command.Amount 
+            ?? throw new InvalidOperationException("Refund amount must be specified or logic to retrieve full payment amount must be implemented.");
         
         // Simulate refund processing
         var isSuccessful = Random.Shared.Next(1, 11) > 1; // 90% success rate

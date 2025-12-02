@@ -1,4 +1,4 @@
-using JCP.TicketWave.CatalogService.Domain.Entities;
+using JCP.TicketWave.CatalogService.Domain.Models;
 
 namespace JCP.TicketWave.CatalogService.Domain.Interfaces;
 

@@ -1,4 +1,4 @@
-using JCP.TicketWave.PaymentService.Domain.Entities;
+using JCP.TicketWave.PaymentService.Domain.Models;
 
 namespace JCP.TicketWave.PaymentService.Domain.Interfaces;
 

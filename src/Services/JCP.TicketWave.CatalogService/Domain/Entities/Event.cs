@@ -140,7 +140,7 @@ public class Event
         }
     }
 
-    // Computed properties for Cosmos DB queries
+    // Computed properties for SQL Server queries
     public string SearchText => $"{Title} {Description} {string.Join(" ", Tags)}".ToLowerInvariant();
     public bool IsUpcoming => Status == EventStatus.Published && StartDateTime > DateTime.UtcNow;
     public bool IsActive => Status == EventStatus.Published;

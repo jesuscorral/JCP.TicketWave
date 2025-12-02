@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using JCP.TicketWave.BookingService.Domain.Entities;
 using JCP.TicketWave.BookingService.Domain.Enums;
+using JCP.TicketWave.BookingService.Domain.Entities;
 
 namespace JCP.TicketWave.BookingService.Infrastructure.Data.Configurations;
 
@@ -14,15 +14,15 @@ public class TicketConfiguration : IEntityTypeConfiguration<Ticket>
         builder.HasKey(t => t.Id);
         
         builder.Property(t => t.Id)
-            .HasColumnType("uuid")
-            .HasDefaultValueSql("gen_random_uuid()");
+            .HasColumnType("uniqueidentifier")
+            .HasDefaultValueSql("NEWID()");
             
         builder.Property(t => t.EventId)
-            .HasColumnType("uuid")
+            .HasColumnType("uniqueidentifier")
             .IsRequired();
             
         builder.Property(t => t.BookingId)
-            .HasColumnType("uuid");
+            .HasColumnType("uniqueidentifier");
             
         builder.Property(t => t.TicketType)
             .HasMaxLength(100)
@@ -41,14 +41,14 @@ public class TicketConfiguration : IEntityTypeConfiguration<Ticket>
             .HasMaxLength(20);
             
         builder.Property(t => t.ReservedUntil)
-            .HasColumnType("timestamp with time zone");
+            .HasColumnType("datetime2");
             
         builder.Property(t => t.CreatedAt)
-            .HasColumnType("timestamp with time zone")
-            .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            .HasColumnType("datetime2")
+            .HasDefaultValueSql("GETUTCDATE()");
             
         builder.Property(t => t.UpdatedAt)
-            .HasColumnType("timestamp with time zone");
+            .HasColumnType("datetime2");
         
         // Foreign key relationship configured in BookingConfiguration
         

@@ -99,6 +99,6 @@ public class Venue
         UpdatedAt = DateTime.UtcNow;
     }
 
-    // Partition key for Cosmos DB (HPK)
+    // Partition key for SQL Server (HPK)
     public string PartitionKey => $"{TenantId}#{CityId}";
 }

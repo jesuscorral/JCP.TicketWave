@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using JCP.TicketWave.PaymentService.Domain.Entities;
 using JCP.TicketWave.PaymentService.Domain.Interfaces;
 using JCP.TicketWave.PaymentService.Infrastructure.Data;
+using JCP.TicketWave.PaymentService.Domain.Entities;
 
 namespace JCP.TicketWave.PaymentService.Infrastructure.Data.Repositories;
 

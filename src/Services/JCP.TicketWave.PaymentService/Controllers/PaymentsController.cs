@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
+using JCP.TicketWave.PaymentService.Domain.Entities;
 using JCP.TicketWave.PaymentService.Features.Payments.GetPaymentStatus;
 using JCP.TicketWave.PaymentService.Features.Payments.ProcessPayment;
-using JCP.TicketWave.PaymentService.Domain.Entities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace JCP.TicketWave.PaymentService.Controllers;
 

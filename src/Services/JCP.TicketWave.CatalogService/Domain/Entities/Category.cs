@@ -74,6 +74,6 @@ public class Category
         UpdatedAt = DateTime.UtcNow;
     }
 
-    // Partition key for Cosmos DB
+    // Partition key for SQL Server
     public string PartitionKey => TenantId;
 }

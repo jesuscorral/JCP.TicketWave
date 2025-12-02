@@ -84,7 +84,7 @@ public class BookingRepository : IBookingRepository
                 .FromSqlRaw(@"
                     SELECT * FROM TicketInventory 
                     WHERE EventId = {0} AND Status = {1}
-                    FOR UPDATE NOWAIT", // PostgreSQL syntax
+                    WITH (UPDLOCK, NOWAIT)", // SQL Server syntax
                     eventId, TicketStatus.Available)
                 .Take(ticketCount)
                 .ToListAsync(cancellationToken);

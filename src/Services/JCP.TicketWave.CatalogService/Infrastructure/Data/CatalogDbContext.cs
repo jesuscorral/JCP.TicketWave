@@ -1,30 +1,28 @@
 using Microsoft.EntityFrameworkCore;
-using JCP.TicketWave.PaymentService.Infrastructure.Data.Configurations;
-using JCP.TicketWave.PaymentService.Domain.Entities;
+using JCP.TicketWave.CatalogService.Infrastructure.Data.Configurations;
+using JCP.TicketWave.CatalogService.Domain.Entities;
 
-namespace JCP.TicketWave.PaymentService.Infrastructure.Data;
+namespace JCP.TicketWave.CatalogService.Infrastructure.Data;
 
-public class PaymentDbContext : DbContext
+public class CatalogDbContext : DbContext
 {
-    public PaymentDbContext(DbContextOptions<PaymentDbContext> options) : base(options) { }
+    public CatalogDbContext(DbContextOptions<CatalogDbContext> options) : base(options) { }
 
-    public DbSet<Payment> Payments { get; set; } = null!;
-    public DbSet<PaymentMethod> PaymentMethods { get; set; } = null!;
-    public DbSet<PaymentEvent> PaymentEvents { get; set; } = null!;
-    public DbSet<Refund> Refunds { get; set; } = null!;
+    public DbSet<Event> Events { get; set; } = null!;
+    public DbSet<Category> Categories { get; set; } = null!;
+    public DbSet<Venue> Venues { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // Set schema for payment service
-        modelBuilder.HasDefaultSchema("payment");
+        // Set schema for catalog service
+        modelBuilder.HasDefaultSchema("catalog");
 
         // Apply configurations
-        modelBuilder.ApplyConfiguration(new PaymentConfiguration());
-        modelBuilder.ApplyConfiguration(new PaymentMethodConfiguration());
-        modelBuilder.ApplyConfiguration(new PaymentEventConfiguration());
-        modelBuilder.ApplyConfiguration(new RefundConfiguration());
+        modelBuilder.ApplyConfiguration(new EventConfiguration());
+        modelBuilder.ApplyConfiguration(new CategoryConfiguration());
+        modelBuilder.ApplyConfiguration(new VenueConfiguration());
 
         // Global configurations
         ConfigureGlobalSettings(modelBuilder);
@@ -64,14 +62,18 @@ public class PaymentDbContext : DbContext
     private void UpdateTimestamps()
     {
         var entries = ChangeTracker.Entries()
-            .Where(e => e.State == EntityState.Modified);
+            .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
 
         foreach (var entry in entries)
         {
-            // Use reflection to set UpdatedAt for entities with private setters
             if (entry.Entity.GetType().GetProperty("UpdatedAt") != null)
             {
                 entry.Property("UpdatedAt").CurrentValue = DateTime.UtcNow;
+            }
+
+            if (entry.State == EntityState.Added && entry.Entity.GetType().GetProperty("CreatedAt") != null)
+            {
+                entry.Property("CreatedAt").CurrentValue = DateTime.UtcNow;
             }
         }
     }

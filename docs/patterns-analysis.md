@@ -82,7 +82,7 @@ Beneficios:
 - Mejor rendimiento de consultas
 - Escalabilidad independiente de lecturas/escrituras
 - Modelos optimizados por operación
-Implementación: Azure SQL con Read Replicas + Azure Cosmos DB para reads
+Implementación: Azure SQL con Read Replicas + esquemas separados para reads
 ```
 
 #### 4. **Database per Service Pattern**
@@ -92,7 +92,7 @@ Beneficios:
 - Verdadera independencia de servicios
 - Tecnologías de BD optimizadas por uso
 - Mejor escalabilidad
-Implementación: SQL Server para transaccionales, Cosmos DB para catalogo
+Implementación: SQL Server unificado con esquemas separados
 ```
 
 ### Patrones de Seguridad Avanzados
@@ -187,11 +187,13 @@ Azure SQL Database:
   - Backup: Geo-redundant
   - Estimated Cost: $300-800/month
 
-Azure Cosmos DB:
-  - Purpose: Catalog Service (read-heavy)
-  - API: SQL Core
-  - Throughput: 1000-4000 RU/s
-  - Estimated Cost: $200-600/month
+Azure SQL Database:
+  - Purpose: Unified database for all services
+  - Tier: General Purpose S2-S4
+  - Schema separation: catalog/booking/payment
+  - Central Package Management: Enabled
+  - Estimated Cost: $200-600/month (consolidated)
+  - Benefits: Simplified operations, consistent technology stack
 
 Azure Redis Cache:
   - Purpose: Session store, caching
@@ -313,7 +315,7 @@ Total Estimated Cost: $800-1,500/month
 Key Services:
 - Container Apps (consumption)
 - SQL Database (Basic/Standard S1)
-- Cosmos DB (minimal RU/s)
+- SQL Server (basic tier)
 - Basic monitoring
 - Shared resources
 ```
@@ -324,7 +326,7 @@ Total Estimated Cost: $1,200-2,500/month
 Key Services:
 - Container Apps (dedicated small)
 - SQL Database (Standard S2)
-- Cosmos DB (1000 RU/s)
+- SQL Server (standard tier)
 - Application Gateway (Standard)
 - Full monitoring stack
 ```
@@ -335,7 +337,7 @@ Total Estimated Cost: $3,500-8,000/month
 Key Services:
 - Container Apps (dedicated + auto-scaling)
 - SQL Database (Premium/Business Critical)
-- Cosmos DB (multi-region, 4000+ RU/s)
+- SQL Server (premium tier with read replicas)
 - Full security stack (WAF, DDoS, Firewall)
 - Complete monitoring y observability
 - Backup y disaster recovery

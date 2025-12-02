@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using JCP.TicketWave.CatalogService.Features.Events.GetEvents;
 using JCP.TicketWave.CatalogService.Features.Events.GetEventById;
+using JCP.TicketWave.CatalogService.Features.Events.GetEvents;
 
 namespace JCP.TicketWave.CatalogService.Controllers;
 

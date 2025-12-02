@@ -115,16 +115,18 @@ ServiceName/
 - **ASP.NET Core** - APIs and Web services
 - **Minimal APIs** - For simple services and Gateway
 - **Worker Services** - For background processing
+- **Central Package Management** - Unified dependency versioning across solution
 
 ### Features per Service
 
 #### Catalog Service
-- **NoSQL optimized** - Prepared for Azure Cosmos DB
+- **SQL Server optimized** - Unified database with schema separation
 - **Distributed cache** - Prepared for Redis for high performance
 - **Read-heavy** - Optimized for frequent queries
+- **Repository pattern** - Complete EF Core implementation
 
 #### Booking Service
-- **PostgreSQL** - For ACID transactions
+- **SQL Server** - For ACID transactions with booking schema
 - **Concurrency handling** - For booking conflicts
 - **Repository pattern** - Complete implementation
 
@@ -144,8 +146,7 @@ ServiceName/
 - .NET 10 SDK
 - Visual Studio 2022 / VS Code
 - SQL Server (for Payment Service)
-- PostgreSQL (for Booking Service)
-- Azure Cosmos DB (for Catalog Service)
+- SQL Server (unified database with schema separation)
 
 ### Build Solution
 ```bash

@@ -6,13 +6,17 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace JCP.TicketWave.PaymentService.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialPaymentMigration : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "payment");
+
             migrationBuilder.CreateTable(
                 name: "PaymentMethods",
+                schema: "payment",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -37,6 +41,7 @@ namespace JCP.TicketWave.PaymentService.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Payments",
+                schema: "payment",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -58,6 +63,7 @@ namespace JCP.TicketWave.PaymentService.Migrations
                     table.ForeignKey(
                         name: "FK_Payments_PaymentMethods_PaymentMethodId",
                         column: x => x.PaymentMethodId,
+                        principalSchema: "payment",
                         principalTable: "PaymentMethods",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -65,6 +71,7 @@ namespace JCP.TicketWave.PaymentService.Migrations
 
             migrationBuilder.CreateTable(
                 name: "PaymentEvents",
+                schema: "payment",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -80,6 +87,7 @@ namespace JCP.TicketWave.PaymentService.Migrations
                     table.ForeignKey(
                         name: "FK_PaymentEvents_Payments_PaymentId",
                         column: x => x.PaymentId,
+                        principalSchema: "payment",
                         principalTable: "Payments",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -87,6 +95,7 @@ namespace JCP.TicketWave.PaymentService.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Refunds",
+                schema: "payment",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -107,6 +116,7 @@ namespace JCP.TicketWave.PaymentService.Migrations
                     table.ForeignKey(
                         name: "FK_Refunds_Payments_PaymentId",
                         column: x => x.PaymentId,
+                        principalSchema: "payment",
                         principalTable: "Payments",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -114,92 +124,110 @@ namespace JCP.TicketWave.PaymentService.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_PaymentEvents_EventType",
+                schema: "payment",
                 table: "PaymentEvents",
                 column: "EventType");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PaymentEvents_OccurredAt",
+                schema: "payment",
                 table: "PaymentEvents",
                 column: "OccurredAt");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PaymentEvents_PaymentId",
+                schema: "payment",
                 table: "PaymentEvents",
                 column: "PaymentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PaymentMethods_ExternalMethodId",
+                schema: "payment",
                 table: "PaymentMethods",
                 column: "ExternalMethodId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PaymentMethods_TenantId",
+                schema: "payment",
                 table: "PaymentMethods",
                 column: "TenantId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PaymentMethods_UserId",
+                schema: "payment",
                 table: "PaymentMethods",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PaymentMethods_UserId_IsDefault",
+                schema: "payment",
                 table: "PaymentMethods",
                 columns: new[] { "UserId", "IsDefault" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payments_BookingId",
+                schema: "payment",
                 table: "Payments",
                 column: "BookingId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payments_CreatedAt",
+                schema: "payment",
                 table: "Payments",
                 column: "CreatedAt");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payments_ExternalPaymentId",
+                schema: "payment",
                 table: "Payments",
                 column: "ExternalPaymentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payments_PaymentMethodId",
+                schema: "payment",
                 table: "Payments",
                 column: "PaymentMethodId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payments_Status",
+                schema: "payment",
                 table: "Payments",
                 column: "Status");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payments_TenantId",
+                schema: "payment",
                 table: "Payments",
                 column: "TenantId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payments_TenantId_Status",
+                schema: "payment",
                 table: "Payments",
                 columns: new[] { "TenantId", "Status" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Refunds_CreatedAt",
+                schema: "payment",
                 table: "Refunds",
                 column: "CreatedAt");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Refunds_ExternalRefundId",
+                schema: "payment",
                 table: "Refunds",
                 column: "ExternalRefundId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Refunds_PaymentId",
+                schema: "payment",
                 table: "Refunds",
                 column: "PaymentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Refunds_Status",
+                schema: "payment",
                 table: "Refunds",
                 column: "Status");
         }
@@ -208,16 +236,20 @@ namespace JCP.TicketWave.PaymentService.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "PaymentEvents");
+                name: "PaymentEvents",
+                schema: "payment");
 
             migrationBuilder.DropTable(
-                name: "Refunds");
+                name: "Refunds",
+                schema: "payment");
 
             migrationBuilder.DropTable(
-                name: "Payments");
+                name: "Payments",
+                schema: "payment");
 
             migrationBuilder.DropTable(
-                name: "PaymentMethods");
+                name: "PaymentMethods",
+                schema: "payment");
         }
     }
 }

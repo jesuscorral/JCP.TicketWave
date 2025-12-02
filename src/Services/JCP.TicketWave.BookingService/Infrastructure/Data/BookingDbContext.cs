@@ -20,11 +20,8 @@ public class BookingDbContext : DbContext
         // Apply all configurations from assembly
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(BookingConfiguration).Assembly);
         
-        // PostgreSQL specific optimizations
-        modelBuilder.HasPostgresExtension("uuid-ossp");
-        
-        // Set schema if needed (default is public)
-        modelBuilder.HasDefaultSchema("public");
+        // Set schema for booking service
+        modelBuilder.HasDefaultSchema("booking");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -32,7 +29,7 @@ public class BookingDbContext : DbContext
         if (!optionsBuilder.IsConfigured)
         {
             // This will be overridden by DI configuration in Program.cs
-            optionsBuilder.UseNpgsql();
+            optionsBuilder.UseSqlServer();
         }
         
         // Enable sensitive data logging only in development

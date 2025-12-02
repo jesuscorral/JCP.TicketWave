@@ -17,34 +17,23 @@ Each microservice has different data access patterns and unique consistency requ
 The "database per service" strategy requires selecting the most appropriate technology for each usage pattern.
 
 ## Decision
-We adopt specialized persistence technologies per service:
+**Updated Decision (December 2024)**: We have simplified to a unified SQL Server database with schema separation for operational efficiency.
 
-### Catalog Service: NoSQL + Cache
-- **Main database**: MongoDB / Azure Cosmos DB
-- **Distributed cache**: Redis
-- **Justification**: 
-  - Read intensive (90% reads, 10% writes)
-  - Flexible schema for different event types
-  - Natural horizontal scalability
-  - Tolerance to eventual consistency
+### Unified SQL Server Database
+- **Database**: SQL Server with schema-based separation
+- **ORM**: Entity Framework Core across all services
+- **Schemas**:
+  - `catalog` - Event catalog management (CatalogService)
+  - `booking` - Booking and ticket transactions (BookingService) 
+  - `payment` - Payment processing and audit (PaymentService)
 
-### Booking Service: Relational SQL
-- **Database**: SQL Server / PostgreSQL
-- **ORM**: Entity Framework Core
-- **Justification**:
-  - Critical ACID transactions
-  - Strong consistency required
-  - Concurrency handling with locking
-  - State change auditing
-
-### Payment Service: Relational SQL + Event Store
-- **Transactional database**: SQL Server / PostgreSQL
-- **Event Store**: For complete audit
-- **Justification**:
-  - Legal audit required
-  - Strict idempotency
-  - Strong consistency for money
-  - Complete operation traceability
+**Justification for Unified Approach**:
+- **Simplified Operations**: Single database instance to manage
+- **Consistent Technology**: EF Core across all services
+- **Logical Separation**: Schema boundaries maintain service isolation
+- **ACID Transactions**: Strong consistency across all domains
+- **Operational Efficiency**: Reduced infrastructure complexity
+- **Development Velocity**: Simplified local development setup
 
 ### Notification Service: Message Queue + Light SQL
 - **Message Queue**: Azure Service Bus / RabbitMQ

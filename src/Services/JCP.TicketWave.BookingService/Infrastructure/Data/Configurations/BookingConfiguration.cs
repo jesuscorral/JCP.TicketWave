@@ -14,15 +14,15 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.HasKey(b => b.Id);
         
         builder.Property(b => b.Id)
-            .HasColumnType("uuid")
-            .HasDefaultValueSql("gen_random_uuid()");
+            .HasColumnType("uniqueidentifier")
+            .HasDefaultValueSql("NEWID()");
             
         builder.Property(b => b.EventId)
-            .HasColumnType("uuid")
+            .HasColumnType("uniqueidentifier")
             .IsRequired();
             
         builder.Property(b => b.UserId)
-            .HasColumnType("uuid")
+            .HasColumnType("uniqueidentifier")
             .IsRequired();
             
         builder.Property(b => b.CustomerEmail)
@@ -42,14 +42,14 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
             .IsRequired();
             
         builder.Property(b => b.CreatedAt)
-            .HasColumnType("timestamp with time zone")
-            .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            .HasColumnType("datetime2")
+            .HasDefaultValueSql("GETUTCDATE()");
             
         builder.Property(b => b.ExpiresAt)
-            .HasColumnType("timestamp with time zone");
+            .HasColumnType("datetime2");
             
         builder.Property(b => b.UpdatedAt)
-            .HasColumnType("timestamp with time zone");
+            .HasColumnType("datetime2");
             
         // Configure navigation property
         builder.HasMany(b => b.Tickets)

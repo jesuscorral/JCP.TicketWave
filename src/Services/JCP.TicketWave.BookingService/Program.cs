@@ -1,11 +1,11 @@
+using Microsoft.EntityFrameworkCore;
 using JCP.TicketWave.BookingService.Features.Bookings.CreateBooking;
 using JCP.TicketWave.BookingService.Features.Bookings.GetBooking;
-using JCP.TicketWave.BookingService.Features.Tickets.ReserveTickets;
-using JCP.TicketWave.BookingService.Controllers;
-using JCP.TicketWave.BookingService.Infrastructure.Data;
-using JCP.TicketWave.BookingService.Infrastructure.Data.Repositories;
 using JCP.TicketWave.BookingService.Domain.Interfaces;
-using Microsoft.EntityFrameworkCore;
+using JCP.TicketWave.BookingService.Features.Tickets.ReserveTickets;
+using JCP.TicketWave.BookingService.Infrastructure.Data;
+using JCP.TicketWave.BookingService.Controllers;
+using JCP.TicketWave.BookingService.Infrastructure.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,14 +35,14 @@ builder.Services.AddScoped<ReserveTicketsHandler>();
 builder.Services.AddDbContext<BookingDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    options.UseNpgsql(connectionString, npgsqlOptions =>
+    options.UseSqlServer(connectionString, sqlOptions =>
     {
-        npgsqlOptions.EnableRetryOnFailure(
+        sqlOptions.EnableRetryOnFailure(
             maxRetryCount: 3,
             maxRetryDelay: TimeSpan.FromSeconds(30),
-            errorCodesToAdd: null);
-        npgsqlOptions.CommandTimeout(30);
-        npgsqlOptions.MigrationsAssembly(typeof(BookingDbContext).Assembly.FullName);
+            errorNumbersToAdd: null);
+        sqlOptions.CommandTimeout(30);
+        sqlOptions.MigrationsAssembly(typeof(BookingDbContext).Assembly.FullName);
     });
 });
 

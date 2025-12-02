@@ -12,14 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JCP.TicketWave.PaymentService.Migrations
 {
     [DbContext(typeof(PaymentDbContext))]
-    [Migration("20251201101337_InitialPaymentMigration")]
-    partial class InitialPaymentMigration
+    [Migration("20251202160252_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("payment")
                 .HasAnnotation("ProductVersion", "10.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
@@ -94,7 +95,7 @@ namespace JCP.TicketWave.PaymentService.Migrations
                     b.HasIndex("TenantId", "Status")
                         .HasDatabaseName("IX_Payments_TenantId_Status");
 
-                    b.ToTable("Payments", (string)null);
+                    b.ToTable("Payments", "payment");
                 });
 
             modelBuilder.Entity("JCP.TicketWave.PaymentService.Domain.Entities.PaymentEvent", b =>
@@ -133,7 +134,7 @@ namespace JCP.TicketWave.PaymentService.Migrations
                     b.HasIndex("PaymentId")
                         .HasDatabaseName("IX_PaymentEvents_PaymentId");
 
-                    b.ToTable("PaymentEvents", (string)null);
+                    b.ToTable("PaymentEvents", "payment");
                 });
 
             modelBuilder.Entity("JCP.TicketWave.PaymentService.Domain.Entities.PaymentMethod", b =>
@@ -205,7 +206,7 @@ namespace JCP.TicketWave.PaymentService.Migrations
                     b.HasIndex("UserId", "IsDefault")
                         .HasDatabaseName("IX_PaymentMethods_UserId_IsDefault");
 
-                    b.ToTable("PaymentMethods", (string)null);
+                    b.ToTable("PaymentMethods", "payment");
                 });
 
             modelBuilder.Entity("JCP.TicketWave.PaymentService.Domain.Entities.Refund", b =>
@@ -265,7 +266,7 @@ namespace JCP.TicketWave.PaymentService.Migrations
                     b.HasIndex("Status")
                         .HasDatabaseName("IX_Refunds_Status");
 
-                    b.ToTable("Refunds", (string)null);
+                    b.ToTable("Refunds", "payment");
                 });
 
             modelBuilder.Entity("JCP.TicketWave.PaymentService.Domain.Entities.Payment", b =>

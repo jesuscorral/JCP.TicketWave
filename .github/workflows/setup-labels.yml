@@ -1,0 +1,12 @@
+name: 🏷️ Setup Labels
+on:
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  setup-labels:
+    uses: sidradataservices/Sidra.ReusableWorkflows/.github/workflows/setup-labels.yml@main
+    secrets: inherit

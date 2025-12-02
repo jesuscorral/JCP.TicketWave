@@ -1,0 +1,14 @@
+name: 🏷️ Auto Label [Issues]
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+  
+jobs:
+  auto-label:
+    uses: sidradataservices/Sidra.ReusableWorkflows/.github/workflows/auto-label.yml@main
+    secrets: inherit

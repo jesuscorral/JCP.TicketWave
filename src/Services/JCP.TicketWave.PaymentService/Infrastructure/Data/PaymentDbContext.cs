@@ -67,15 +67,15 @@ public class PaymentDbContext : DbContext
         {
             if (entry.Entity is Payment payment)
             {
-                payment.GetType().GetProperty("UpdatedAt")?.SetValue(payment, DateTime.UtcNow);
+                payment.UpdatedAt = DateTime.UtcNow;
             }
             else if (entry.Entity is PaymentMethod paymentMethod)
             {
-                paymentMethod.GetType().GetProperty("UpdatedAt")?.SetValue(paymentMethod, DateTime.UtcNow);
+                paymentMethod.UpdatedAt = DateTime.UtcNow;
             }
             else if (entry.Entity is Refund refund)
             {
-                refund.GetType().GetProperty("UpdatedAt")?.SetValue(refund, DateTime.UtcNow);
+                refund.UpdatedAt = DateTime.UtcNow;
             }
         }
     }

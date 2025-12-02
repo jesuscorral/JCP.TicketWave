@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using JCP.TicketWave.PaymentService.Features.Refunds.ProcessRefund;
+using JCP.TicketWave.PaymentService.Domain.Entities;
 
 namespace JCP.TicketWave.PaymentService.Controllers;
 

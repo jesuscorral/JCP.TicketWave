@@ -1,3 +1,5 @@
+using JCP.TicketWave.PaymentService.Domain.Entities;
+
 namespace JCP.TicketWave.PaymentService.Features.Refunds.ProcessRefund;
 
 public record ProcessRefundResponse(
@@ -7,12 +9,3 @@ public record ProcessRefundResponse(
     RefundStatus Status,
     DateTime ProcessedAt,
     string? FailureReason);
-
-public enum RefundStatus
-{
-    Pending,
-    Processing,
-    Succeeded,
-    Failed,
-    Cancelled
-}

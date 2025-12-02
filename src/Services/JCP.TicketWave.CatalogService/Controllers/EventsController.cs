@@ -16,7 +16,13 @@ public static class EventsController
             GetEventsHandler handler,
             CancellationToken cancellationToken) =>
         {
-            var query = new GetEventsQuery(page, pageSize, category, search);
+            var query = new GetEventsQuery 
+            { 
+                Page = page, 
+                PageSize = pageSize, 
+                Category = category, 
+                Search = search 
+            };
             var result = await handler.Handle(query, cancellationToken);
             return Results.Ok(result);
         })

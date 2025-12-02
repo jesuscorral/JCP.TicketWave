@@ -97,7 +97,7 @@ public class ProcessRefundHandler
             var refund = Refund.Create(
                 command.PaymentId,
                 refundAmount,
-                "USD", // Default currency - could be derived from payment
+                payment.Currency, // Use currency from original payment
                 command.Reason ?? "Refund requested");
 
             // Process refund with payment gateway

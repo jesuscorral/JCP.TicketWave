@@ -8,5 +8,5 @@ permissions:
 
 jobs:
   setup-labels:
-    uses: sidradataservices/Sidra.ReusableWorkflows/.github/workflows/setup-labels.yml@main
+    uses: jesuscorral/reusable-workflows/.github/workflows/setup-labels.yml@main
     secrets: inherit

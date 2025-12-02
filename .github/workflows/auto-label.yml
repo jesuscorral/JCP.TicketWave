@@ -10,5 +10,5 @@ permissions:
   
 jobs:
   auto-label:
-    uses: sidradataservices/Sidra.ReusableWorkflows/.github/workflows/auto-label.yml@main
+    uses: jesuscorral/reusable-workflows/.github/workflows/add-issue-labels.yml@main
     secrets: inherit

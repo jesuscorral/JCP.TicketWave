@@ -1,4 +1,4 @@
-namespace JCP.TicketWave.BookingService.Features.Tickets.ReserveTickets;
+namespace JCP.TicketWave.BookingService.Features.Features.Tickets.ReserveTickets;
 
 public record ReserveTicketsResponse(
     Guid ReservationId,

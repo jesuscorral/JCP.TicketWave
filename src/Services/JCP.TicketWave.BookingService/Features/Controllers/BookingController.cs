@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using JCP.TicketWave.BookingService.Features.Bookings.CreateBooking;
 using JCP.TicketWave.BookingService.Features.Bookings.GetBooking;
 
-namespace JCP.TicketWave.BookingService.Controllers;
+namespace JCP.TicketWave.BookingService.Features.Controllers;
 
 public static class BookingController
 {

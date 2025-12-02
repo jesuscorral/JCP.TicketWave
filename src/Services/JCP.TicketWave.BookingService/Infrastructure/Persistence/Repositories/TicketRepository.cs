@@ -4,7 +4,7 @@ using JCP.TicketWave.BookingService.Domain.Entities;
 using JCP.TicketWave.BookingService.Domain.Interfaces;
 using JCP.TicketWave.BookingService.Infrastructure.Data;
 
-namespace JCP.TicketWave.BookingService.Infrastructure.Data.Repositories;
+namespace JCP.TicketWave.BookingService.Infrastructure.Persistence.Repositories;
 
 public class TicketRepository : ITicketRepository
 {

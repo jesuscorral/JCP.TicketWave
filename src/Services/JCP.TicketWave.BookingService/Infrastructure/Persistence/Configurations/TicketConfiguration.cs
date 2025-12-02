@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using JCP.TicketWave.BookingService.Domain.Enums;
 using JCP.TicketWave.BookingService.Domain.Entities;
 
-namespace JCP.TicketWave.BookingService.Infrastructure.Data.Configurations;
+namespace JCP.TicketWave.BookingService.Infrastructure.Persistence.Configurations;
 
 public class TicketConfiguration : IEntityTypeConfiguration<Ticket>
 {

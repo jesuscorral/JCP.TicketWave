@@ -1,4 +1,4 @@
-namespace JCP.TicketWave.BookingService.Features.Bookings.CreateBooking;
+namespace JCP.TicketWave.BookingService.Features.Features.Bookings.CreateBooking;
 
 public class CreateBookingHandler
     {

@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using JCP.TicketWave.BookingService.Domain.Entities;
 using JCP.TicketWave.BookingService.Infrastructure.Data.Configurations;
 
-namespace JCP.TicketWave.BookingService.Infrastructure.Data;
+namespace JCP.TicketWave.BookingService.Infrastructure.Persistence;
 
 public class BookingDbContext : DbContext
 {

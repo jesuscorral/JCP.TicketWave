@@ -1,6 +1,6 @@
 using JCP.TicketWave.BookingService.Domain.Enums;
 
-namespace JCP.TicketWave.BookingService.Domain.Entities;
+namespace JCP.TicketWave.BookingService.Domain.Models;
 
 public class Ticket
 {

@@ -1,44 +1,179 @@
+using JCP.TicketWave.PaymentService.Domain.Entities;
+using JCP.TicketWave.PaymentService.Domain.Interfaces;
+
 namespace JCP.TicketWave.PaymentService.Features.Refunds.ProcessRefund;
 
 public class ProcessRefundHandler
 {
-    // TODO: Implement Stripe/PayPal refund integration
-    // TODO: Implement idempotency mechanism
-    // TODO: Implement partial refund validation
+    private readonly IPaymentRepository _paymentRepository;
+    private readonly IRefundRepository _refundRepository;
+    private readonly ILogger<ProcessRefundHandler> _logger;
+
+    public ProcessRefundHandler(
+        IPaymentRepository paymentRepository,
+        IRefundRepository refundRepository,
+        ILogger<ProcessRefundHandler> logger)
+    {
+        _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
+        _refundRepository = refundRepository ?? throw new ArgumentNullException(nameof(refundRepository));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
     public async Task<ProcessRefundResponse> Handle(ProcessRefundCommand command, CancellationToken cancellationToken)
     {
-        // Placeholder implementation
-        await Task.Delay(100, cancellationToken);
-        
-        var refundId = Guid.NewGuid();
-        var refundIntentId = $"re_{Guid.NewGuid():N}";
-        // Use the provided refund amount, or retrieve the full payment amount from the original transaction if null.
-        var refundAmount = command.Amount 
-            ?? throw new InvalidOperationException("Refund amount must be specified or logic to retrieve full payment amount must be implemented.");
-        
-        // Simulate refund processing
-        var isSuccessful = Random.Shared.Next(1, 11) > 1; // 90% success rate
-        
-        // Simulate specific failure reasons
-        string? failureReason = null;
-        if (!isSuccessful)
+        try
         {
-            if (command.Amount.HasValue && command.Amount.Value <= 0)
-                failureReason = "Refund amount must be greater than zero.";
-            else if (command.Amount.HasValue && command.Amount.Value > 1000)
-                failureReason = "Refund amount exceeds allowed limit.";
-            else if (Random.Shared.Next(0, 2) == 0)
-                failureReason = "Refund period expired.";
+            _logger.LogDebug("Processing refund for payment {PaymentId} with amount {Amount}", 
+                command.PaymentId, command.Amount);
+
+            // Get the original payment
+            var payment = await _paymentRepository.GetByIdAsync(command.PaymentId);
+            if (payment == null)
+            {
+                _logger.LogWarning("Payment {PaymentId} not found for refund", command.PaymentId);
+                return new ProcessRefundResponse(
+                    RefundId: Guid.NewGuid(),
+                    RefundIntentId: string.Empty,
+                    RefundAmount: command.Amount ?? 0,
+                    Status: RefundStatus.Failed,
+                    ProcessedAt: DateTime.UtcNow,
+                    FailureReason: "Original payment not found"
+                );
+            }
+
+            // Validate payment is refundable
+            if (payment.Status != PaymentStatus.Succeeded)
+            {
+                _logger.LogWarning("Payment {PaymentId} is not in a refundable status: {Status}", 
+                    command.PaymentId, payment.Status);
+                return new ProcessRefundResponse(
+                    RefundId: Guid.NewGuid(),
+                    RefundIntentId: string.Empty,
+                    RefundAmount: command.Amount ?? 0,
+                    Status: RefundStatus.Failed,
+                    ProcessedAt: DateTime.UtcNow,
+                    FailureReason: "Payment is not in a refundable status"
+                );
+            }
+
+            // Determine refund amount
+            var refundAmount = command.Amount ?? payment.Amount;
+
+            // Validate refund amount
+            if (refundAmount <= 0)
+            {
+                _logger.LogWarning("Invalid refund amount {Amount} for payment {PaymentId}", 
+                    refundAmount, command.PaymentId);
+                return new ProcessRefundResponse(
+                    RefundId: Guid.NewGuid(),
+                    RefundIntentId: string.Empty,
+                    RefundAmount: refundAmount,
+                    Status: RefundStatus.Failed,
+                    ProcessedAt: DateTime.UtcNow,
+                    FailureReason: "Refund amount must be greater than zero"
+                );
+            }
+
+            // Check if refund amount doesn't exceed remaining refundable amount
+            var existingRefunds = await _refundRepository.GetByPaymentIdAsync(command.PaymentId);
+            var totalRefunded = existingRefunds.Where(r => r.Status == RefundStatus.Succeeded)
+                                              .Sum(r => r.Amount);
+            
+            if (refundAmount > payment.Amount - totalRefunded)
+            {
+                _logger.LogWarning("Refund amount {RefundAmount} exceeds available amount {AvailableAmount} for payment {PaymentId}", 
+                    refundAmount, payment.Amount - totalRefunded, command.PaymentId);
+                return new ProcessRefundResponse(
+                    RefundId: Guid.NewGuid(),
+                    RefundIntentId: string.Empty,
+                    RefundAmount: refundAmount,
+                    Status: RefundStatus.Failed,
+                    ProcessedAt: DateTime.UtcNow,
+                    FailureReason: "Refund amount exceeds available refundable amount"
+                );
+            }
+
+            // Create refund entity
+            var refund = Refund.Create(
+                command.PaymentId,
+                refundAmount,
+                payment.Currency, // Use currency from original payment
+                command.Reason ?? "Refund requested");
+
+            // Process refund with payment gateway
+            var processingResult = await ProcessWithPaymentGateway(refund, payment, cancellationToken);
+            
+            if (processingResult.IsSuccess)
+            {
+                if (processingResult.TransactionId != null)
+                {
+                    refund.MarkAsProcessing(processingResult.TransactionId);
+                }
+                refund.MarkAsSucceeded();
+                _logger.LogInformation("Refund {RefundId} completed successfully", refund.Id);
+            }
             else
-                failureReason = "Payment method does not support refunds.";
+            {
+                refund.MarkAsFailed(processingResult.FailureReason ?? "Unknown payment gateway error");
+                _logger.LogWarning("Refund {RefundId} failed: {Reason}", refund.Id, processingResult.FailureReason);
+            }
+
+            // Save refund
+            await _refundRepository.CreateAsync(refund);
+
+            return new ProcessRefundResponse(
+                RefundId: refund.Id,
+                RefundIntentId: refund.ExternalRefundId ?? $"re_{refund.Id:N}",
+                RefundAmount: refund.Amount,
+                Status: refund.Status,
+                ProcessedAt: DateTime.UtcNow,
+                FailureReason: refund.Status == RefundStatus.Failed ? refund.FailureReason : null
+            );
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing refund for payment {PaymentId}", command.PaymentId);
+            throw;
+        }
+    }
+
+    private async Task<RefundGatewayResult> ProcessWithPaymentGateway(Refund refund, Payment payment, CancellationToken cancellationToken)
+    {
+        // Simulate payment gateway refund integration
+        await Task.Delay(100, cancellationToken); // Simulate network call
         
-        return new ProcessRefundResponse(
-            RefundId: refundId,
-            RefundIntentId: refundIntentId,
-            RefundAmount: refundAmount,
-            Status: isSuccessful ? RefundStatus.Succeeded : RefundStatus.Failed,
-            ProcessedAt: DateTime.UtcNow,
-            FailureReason: isSuccessful ? null : failureReason);
+        // For demonstration, we'll simulate a 95% success rate
+        var isSuccess = Random.Shared.NextDouble() > 0.05;
+        
+        if (isSuccess)
+        {
+            return new RefundGatewayResult
+            {
+                IsSuccess = true,
+                TransactionId = $"REF_{Guid.NewGuid():N}"
+            };
+        }
+        else
+        {
+            var failureReasons = new[]
+            {
+                "Payment method does not support refunds",
+                "Refund period expired",
+                "Insufficient balance in merchant account"
+            };
+            
+            return new RefundGatewayResult
+            {
+                IsSuccess = false,
+                FailureReason = failureReasons[Random.Shared.Next(failureReasons.Length)]
+            };
+        }
+    }
+
+    private class RefundGatewayResult
+    {
+        public bool IsSuccess { get; set; }
+        public string? TransactionId { get; set; }
+        public string? FailureReason { get; set; }
     }
 }

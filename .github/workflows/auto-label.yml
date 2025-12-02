@@ -1,0 +1,14 @@
+name: 🏷️ Auto Label [Issues]
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+  
+jobs:
+  auto-label:
+    uses: jesuscorral/reusable-workflows/.github/workflows/add-issue-labels.yml@main
+    secrets: inherit

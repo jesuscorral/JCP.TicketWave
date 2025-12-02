@@ -2,6 +2,10 @@ using JCP.TicketWave.CatalogService.Features.Events.GetEvents;
 using JCP.TicketWave.CatalogService.Features.Events.GetEventById;
 using JCP.TicketWave.CatalogService.Features.Categories.GetCategories;
 using JCP.TicketWave.CatalogService.Controllers;
+using JCP.TicketWave.CatalogService.Infrastructure.Data;
+using JCP.TicketWave.CatalogService.Infrastructure.Data.Repositories;
+using JCP.TicketWave.CatalogService.Domain.Interfaces;
+using Microsoft.Azure.Cosmos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +25,37 @@ builder.Services.AddSwaggerGen(c =>
         return type.Name;
     });
 });
+
+// Configure Azure Cosmos DB
+var cosmosConnectionString = builder.Configuration.GetConnectionString("CosmosDb");
+if (!string.IsNullOrEmpty(cosmosConnectionString))
+{
+    builder.Services.AddSingleton(serviceProvider =>
+    {
+        var cosmosClientOptions = new CosmosClientOptions
+        {
+            MaxRetryAttemptsOnRateLimitedRequests = 3,
+            MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(30),
+            ConnectionMode = ConnectionMode.Gateway,
+            MaxRequestsPerTcpConnection = 10,
+            MaxTcpConnectionsPerEndpoint = 16,
+            RequestTimeout = TimeSpan.FromSeconds(30)
+        };
+
+        return new CosmosClient(cosmosConnectionString, cosmosClientOptions);
+    });
+
+    builder.Services.AddSingleton<CosmosDbService>();
+    
+    // Register repository implementations
+    builder.Services.AddScoped<IEventRepository, EventRepository>();
+    builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+    builder.Services.AddScoped<IVenueRepository, VenueRepository>();
+}
+else
+{
+    throw new InvalidOperationException("CosmosDb connection string is required");
+}
 
 // Register handlers for dependency injection
 builder.Services.AddScoped<GetEventsHandler>();

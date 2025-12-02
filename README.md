@@ -1,56 +1,56 @@
-# JCP.TicketWave - Sistema de Gestión de Eventos y Venta de Entradas
+# JCP.TicketWave - Event Management and Ticket Sales System
 
-## Descripción
+## Description
 
-JCP.TicketWave es una solución de microservicios desarrollada en .NET 10 para la gestión de eventos y venta de entradas de alta demanda, similar a Ticketmaster o Eventbrite pero simplificado. 
+JCP.TicketWave is a microservices solution developed in .NET 10 for high-demand event management and ticket sales, similar to Ticketmaster or Eventbrite but simplified.
 
-## Arquitectura
+## Architecture
 
-La solución utiliza **Clean Architecture** con **Vertical Slices** para organizar el código de manera eficiente y mantenible.
+The solution uses **Clean Architecture** with **Vertical Slices** to organize code efficiently and maintainably.
 
-### Microservicios
+### Microservices
 
-1. **Catalog Service** (Puerto 7001)
-   - **Propósito**: Gestión del catálogo de eventos
-   - **Características**: Lectura intensiva, optimizado para caché y NoSQL
+1. **Catalog Service** (Port 7001)
+   - **Purpose**: Event catalog management
+   - **Features**: Read-intensive, optimized for cache and NoSQL
    - **Endpoints**:
-     - `GET /api/events` - Lista de eventos con paginación y filtros
-     - `GET /api/events/{id}` - Detalles de un evento específico
-     - `GET /api/categories` - Categorías de eventos
+     - `GET /api/events` - Event list with pagination and filters
+     - `GET /api/events/{id}` - Specific event details
+     - `GET /api/categories` - Event categories
 
-2. **Booking Service** (Puerto 7002)
-   - **Propósito**: Gestión de reservas y tickets
-   - **Características**: Escritura crítica, SQL Server, transacciones ACID, manejo de bloqueos
+2. **Booking Service** (Port 7002)
+   - **Purpose**: Booking and ticket management
+   - **Features**: Critical writing, SQL Server, ACID transactions, locking management
    - **Endpoints**:
-     - `POST /api/bookings` - Crear nueva reserva
-     - `GET /api/bookings/{id}` - Obtener detalles de reserva
-     - `POST /api/tickets/reserve` - Reservar tickets temporalmente
+     - `POST /api/bookings` - Create new booking
+     - `GET /api/bookings/{id}` - Get booking details
+     - `POST /api/tickets/reserve` - Reserve tickets temporarily
 
-3. **Payment Service** (Puerto 7003)
-   - **Propósito**: Procesamiento de pagos y reembolsos
-   - **Características**: Integración con terceros (Stripe/PayPal), idempotencia
+3. **Payment Service** (Port 7003)
+   - **Purpose**: Payment processing and refunds
+   - **Features**: Third-party integration (Stripe/PayPal), idempotency
    - **Endpoints**:
-     - `POST /api/payments` - Procesar pago
-     - `GET /api/payments/{id}` - Estado del pago
-     - `POST /api/refunds` - Procesar reembolso
+     - `POST /api/payments` - Process payment
+     - `GET /api/payments/{id}` - Payment status
+     - `POST /api/refunds` - Process refund
 
-4. **Notification Service** (Puerto 7004)
-   - **Propósito**: Envío de notificaciones y generación de PDFs
-   - **Características**: Worker service, procesamiento en background, email, PDFs
-   - **Funciones**:
-     - Envío de emails de confirmación
-     - Generación de tickets en PDF
-     - Procesamiento de colas de mensajes
+4. **Notification Service** (Port 7004)
+   - **Purpose**: Notification sending and PDF generation
+   - **Features**: Worker service, background processing, email, PDFs
+   - **Functions**:
+     - Confirmation email sending
+     - PDF ticket generation
+     - Message queue processing
 
-5. **API Gateway** (Puerto 7000)
-   - **Propósito**: Punto de entrada unificado para todos los servicios
-   - **Características**: Enrutamiento, agregación de servicios, health checks
-   - **Funciones**:
-     - Proxy a microservicios
-     - Health check consolidado
-     - CORS y configuración centralizada
+5. **API Gateway** (Port 7000)
+   - **Purpose**: Unified entry point for all services
+   - **Features**: Routing, service aggregation, health checks
+   - **Functions**:
+     - Microservice proxy
+     - Consolidated health check
+     - CORS and centralized configuration
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 JCP.TicketWave/
@@ -58,115 +58,121 @@ JCP.TicketWave/
 │   ├── Gateway/
 │   │   └── JCP.TicketWave.Gateway/          # API Gateway
 │   ├── Services/
-│   │   ├── JCP.TicketWave.CatalogService/   # Servicio de Catálogo
-│   │   ├── JCP.TicketWave.BookingService/   # Servicio de Reservas
-│   │   ├── JCP.TicketWave.PaymentService/   # Servicio de Pagos
-│   │   └── JCP.TicketWave.NotificationService/ # Servicio de Notificaciones
+│   │   ├── JCP.TicketWave.CatalogService/   # Catalog Service
+│   │   ├── JCP.TicketWave.BookingService/   # Booking Service
+│   │   ├── JCP.TicketWave.PaymentService/   # Payment Service
+│   │   └── JCP.TicketWave.NotificationService/ # Notification Service
 │   └── Shared/
-│       ├── JCP.TicketWave.Shared.Contracts/ # Contratos compartidos
-│       └── JCP.TicketWave.Shared.Infrastructure/ # Infraestructura compartida
-└── tests/ (Estructura preparada para tests)
+│       ├── JCP.TicketWave.Shared.Contracts/ # Shared contracts
+│       └── JCP.TicketWave.Shared.Infrastructure/ # Shared infrastructure
+└── tests/ (Structure prepared for tests)
 ```
 
-### Estructura por Servicio (Clean Architecture + Vertical Slices)
+### Service Structure (Clean Architecture + Vertical Slices)
 
-Cada servicio sigue la misma estructura:
+Each service follows the same structure:
 
 ```
 ServiceName/
-├── Features/           # Vertical Slices organizados por funcionalidad
+├── Features/           # Vertical Slices organized by functionality
 │   ├── FeatureName/
-│   │   ├── Command.cs  # Comandos (escritura)
-│   │   ├── Query.cs    # Consultas (lectura)
-│   │   └── Handler.cs  # Lógica de negocio
-├── Domain/            # Entidades de dominio
-├── Infrastructure/    # Implementaciones de infraestructura
-└── Program.cs         # Configuración del servicio
+│   │   ├── Command.cs  # Commands (write operations)
+│   │   ├── Query.cs    # Queries (read operations)
+│   │   └── Handler.cs  # Business logic
+├── Domain/            # Domain entities
+├── Infrastructure/    # Infrastructure implementations
+└── Program.cs         # Service configuration
 ```
 
-## Patrones Implementados
+## Implemented Patterns
 
 ### 1. Vertical Slice Architecture
-- Cada feature está completamente autocontenida
-- Reduce acoplamiento entre funcionalidades
-- Facilita el desarrollo en paralelo
+- Each feature is completely self-contained
+- Reduces coupling between functionalities
+- Facilitates parallel development
 
 ### 2. CQRS (Command Query Responsibility Segregation)
-- Separación clara entre comandos y consultas
-- Optimización independiente para lectura y escritura
+- Clear separation between commands and queries
+- Independent optimization for read and write operations
 
 ### 3. Domain Events
-- Comunicación asíncrona entre servicios
-- Infraestructura preparada para eventos de dominio
+- Asynchronous communication between services
+- Infrastructure prepared for domain events
 
 ### 4. Repository Pattern
-- Abstracción de acceso a datos
-- Facilita testing y cambios de implementación
+- Data access abstraction
+- Facilitates testing and implementation changes
 
-## Tecnologías y Características
+### 5. Basic DDD Elements (Partial Implementation)
+- Domain entities with base classes
+- Aggregate roots with domain events
+- Basic domain modeling structure
 
-### Tecnologías Base
-- **.NET 10** - Framework principal
-- **ASP.NET Core** - APIs y Web services
-- **Minimal APIs** - Para servicios simples y Gateway
-- **Worker Services** - Para procesamiento background
+## Technologies and Features
 
-### Características de Cada Servicio
+### Base Technologies
+- **.NET 10** - Main framework
+- **ASP.NET Core** - APIs and Web services
+- **Minimal APIs** - For simple services and Gateway
+- **Worker Services** - For background processing
+
+### Features per Service
 
 #### Catalog Service
-- **NoSQL optimizado** - Preparado para MongoDB/CosmosDB
-- **Caché distribuido** - Redis para alta performance
-- **Read-heavy** - Optimizado para consultas frecuentes
+- **NoSQL optimized** - Prepared for Azure Cosmos DB
+- **Distributed cache** - Prepared for Redis for high performance
+- **Read-heavy** - Optimized for frequent queries
 
 #### Booking Service
-- **SQL Server** - Para transacciones ACID
-- **Pessimistic Locking** - Para manejo de concurrencia
-- **Unit of Work** - Para transacciones complejas
+- **PostgreSQL** - For ACID transactions
+- **Concurrency handling** - For booking conflicts
+- **Repository pattern** - Complete implementation
 
 #### Payment Service
-- **Idempotencia** - Prevención de pagos duplicados
-- **Retry Logic** - Manejo de fallos temporales
-- **Third-party Integration** - Stripe, PayPal, etc.
+- **SQL Server** - For financial transactions
+- **Repository pattern** - Complete implementation
+- **Third-party Integration** - Ready for Stripe, PayPal, etc.
 
 #### Notification Service
-- **Message Queues** - Azure Service Bus, RabbitMQ
-- **Email Services** - SendGrid, SMTP
-- **PDF Generation** - iTextSharp, PdfSharp
+- **Message Queues** - Prepared for Azure Service Bus, RabbitMQ
+- **Email Services** - Ready for SendGrid, SMTP
+- **PDF Generation** - Ready for iTextSharp, PdfSharp
 
-## Configuración y Ejecución
+## Configuration and Execution
 
-### Prerrequisitos
+### Prerequisites
 - .NET 10 SDK
 - Visual Studio 2022 / VS Code
-- SQL Server (para Booking Service)
-- Redis (para Catalog Service cache)
+- SQL Server (for Payment Service)
+- PostgreSQL (for Booking Service)
+- Azure Cosmos DB (for Catalog Service)
 
-### Compilar la Solución
+### Build Solution
 ```bash
 dotnet build
 ```
 
-### Ejecutar Servicios Individualmente
+### Run Individual Services
 
-#### Gateway (Puerto 7000)
+#### Gateway (Port 7000)
 ```bash
 cd src/Gateway/JCP.TicketWave.Gateway
 dotnet run
 ```
 
-#### Catalog Service (Puerto 7001)
+#### Catalog Service (Port 7001)
 ```bash
 cd src/Services/JCP.TicketWave.CatalogService
 dotnet run
 ```
 
-#### Booking Service (Puerto 7002)
+#### Booking Service (Port 7002)
 ```bash
 cd src/Services/JCP.TicketWave.BookingService
 dotnet run
 ```
 
-#### Payment Service (Puerto 7003)
+#### Payment Service (Port 7003)
 ```bash
 cd src/Services/JCP.TicketWave.PaymentService
 dotnet run
@@ -181,65 +187,119 @@ dotnet run
 ### Health Checks
 
 - **Gateway**: `https://localhost:7000/health`
-- **Servicios consolidados**: `https://localhost:7000/health/services`
-- **Servicios individuales**: `https://localhost:700X/health`
+- **Consolidated services**: `https://localhost:7000/health/services`
+- **Individual services**: `https://localhost:700X/health`
 
-### Documentación API
+### API Documentation
 
-Cada servicio expone documentación Swagger:
+Each service exposes Swagger documentation:
 - **Gateway**: `https://localhost:7000/swagger`
 - **Catalog**: `https://localhost:7001/swagger`
 - **Booking**: `https://localhost:7002/swagger`
 - **Payment**: `https://localhost:7003/swagger`
 
-## Próximos Pasos (TODOs)
+## Next Steps (Pending Implementations)
 
-### Implementaciones Pendientes
+### 1. Persistence Layer
+   - ✅ Repository Pattern implemented for all services
+   - ⏳ Redis cache implementation for Catalog Service
+   - ⏳ Advanced database optimizations
 
-1. **Persistence Layer**
-   - Entity Framework Core para Booking Service
-   - MongoDB driver para Catalog Service
-   - Redis cache implementation
+### 2. Message Queues
+   - ⏳ Azure Service Bus integration
+   - ⏳ Event-driven communication between services
+   - ⏳ Outbox Pattern for transactional consistency
 
-2. **Message Queues**
-   - Azure Service Bus integration
-   - Event-driven communication entre servicios
+### 3. Authentication & Authorization
+   - ⏳ JWT tokens
+   - ⏳ Identity Service
+   - ⏳ API Gateway authentication
 
-3. **Authentication & Authorization**
-   - JWT tokens
-   - Identity Service
-   - API Gateway authentication
+### 4. .NET Aspire Integration
+   - ⏳ Cloud-native orchestration for local development
+   - ⏳ Service discovery and configuration management
+   - ⏳ Distributed application dashboard and telemetry
+   - ⏳ Simplified dependency management between microservices
 
-4. **Monitoring & Logging**
-   - Application Insights
-   - Structured logging
-   - Distributed tracing
+### 5. Monitoring & Observability
+   - ⏳ Application Insights integration
+   - ⏳ Structured logging with Serilog
+   - ⏳ Distributed tracing with OpenTelemetry
+   - ⏳ Health checks and metrics collection
 
-5. **Testing**
-   - Unit tests para cada feature
-   - Integration tests
-   - Load testing para alta demanda
+### 6. Testing Strategy
+   - ⏳ **Unit Tests**: Business logic testing for handlers and domain entities
+   - ⏳ **Integration Tests**: API endpoint testing with real databases
+   - ⏳ **Repository Tests**: Data access layer testing with test containers
+   - ⏳ **Domain Tests**: Domain entity and value object validation
+   - ⏳ **Feature Tests**: Complete vertical slice testing
+   - ⏳ **Contract Tests**: API contract validation between services
+   - ⏳ **Load Tests**: High-demand scenarios and performance benchmarks
+   - ⏳ **Stress Tests**: System behavior under extreme load
+   - ⏳ **End-to-End Tests**: Complete user journey testing
+   - ⏳ **API Tests**: REST API validation and response verification
+   - ⏳ **Database Tests**: Data consistency and transaction testing
+   - ⏳ **Security Tests**: Authentication, authorization, and vulnerability testing
+   - ⏳ **Chaos Tests**: Resilience testing with service failures
+   - ⏳ **Smoke Tests**: Basic functionality validation in production
+   - ⏳ **Regression Tests**: Preventing feature breakdown after changes
+   - ⏳ **Mutation Tests**: Code coverage quality validation
+   - ⏳ **Property-Based Tests**: Random input validation for edge cases
+   - ⏳ **Architecture Tests**: Architectural constraint validation
+   - ⏳ **Snapshot Tests**: Output consistency validation
+   - ⏳ **Acceptance Tests**: Business requirement validation
 
-6. **DevOps**
-   - Docker containers
-   - Kubernetes deployment
-   - CI/CD pipelines
+### 7. DevOps & Infrastructure
+   - ⏳ Docker containers and multi-stage builds
+   - ⏳ Kubernetes deployment manifests
+   - ⏳ CI/CD pipelines with GitHub Actions
+   - ⏳ Infrastructure as Code with Bicep/Terraform
 
-## Escalabilidad
+### 8. Security & Compliance
+   - ⏳ HTTPS enforcement and certificate management
+   - ⏳ API rate limiting and throttling
+   - ⏳ Data encryption at rest and in transit
+   - ⏳ GDPR compliance for user data
 
-La arquitectura está diseñada para soportar alta demanda:
+### 9. Advanced Patterns (Future Implementations)
+   - ⏳ GraphQL API layer
+   - ⏳ Result Pattern for error handling
+   - ⏳ Cache-Aside Pattern for distributed caching
+   - ⏳ Advanced DDD implementation with rich domain models
+   - ⏳ Event Sourcing for audit trails
 
-- **Horizontal Scaling**: Cada servicio puede escalarse independientemente
-- **Database Optimization**: NoSQL para lecturas, SQL para transacciones críticas
-- **Caching Strategy**: Redis para datos frecuentemente accedidos
-- **Event-Driven**: Comunicación asíncrona para reducir acoplamiento
-- **Load Balancing**: Gateway como punto único de entrada
+### 10. Complete Domain-Driven Design Implementation
+   - ⏳ Rich domain models with business invariants
+   - ⏳ Value Objects for type safety and validation
+   - ⏳ Domain Services for cross-aggregate operations
+   - ⏳ Specification pattern for complex business rules
+   - ⏳ Domain Events with event handlers
+   - ⏳ Bounded Context mapping and integration
+   - ⏳ Anti-corruption layers between contexts
+   - ⏳ Aggregate design with proper boundaries
+   - ⏳ Factory pattern for complex object creation
+   - ⏳ Repository interfaces defined in domain layer
+   - ⏳ Unit of Work pattern for transaction boundaries
+   - ⏳ Domain-driven validation and business rules
+   - ⏳ Ubiquitous language documentation
+   - ⏳ Event Storming session artifacts
+   - ⏳ Context mapping documentation
 
-## Contribución
+## Scalability
 
-Este proyecto utiliza las mejores prácticas de desarrollo:
+The architecture is designed to support high demand:
+
+- **Horizontal Scaling**: Each service can scale independently
+- **Database Optimization**: NoSQL for reads, SQL for critical transactions
+- **Caching Strategy**: Prepared for Redis for frequently accessed data
+- **Event-Driven**: Asynchronous communication to reduce coupling
+- **Load Balancing**: Gateway as single entry point
+
+## Contributing
+
+This project uses development best practices:
 - Clean Code principles
 - SOLID principles
-- Domain Driven Design (DDD)
-- Test Driven Development (TDD) - preparado para implementar
-- Continuous Integration/Deployment - preparado para implementar
+- Domain Driven Design (DDD) - basic implementation, ready to expand
+- Test Driven Development (TDD) - prepared for implementation
+- Continuous Integration/Deployment - prepared for implementation

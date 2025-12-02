@@ -192,38 +192,51 @@ Cada servicio expone documentación Swagger:
 - **Booking**: `https://localhost:7002/swagger`
 - **Payment**: `https://localhost:7003/swagger`
 
-## Próximos Pasos (TODOs)
+## Next Steps (Pending Implementations)
 
-### Implementaciones Pendientes
-
-1. **Persistence Layer**
-   - Entity Framework Core para Booking Service
-   - MongoDB driver para Catalog Service
+### 1. Persistence Layer
+   - Entity Framework Core for Booking Service
+   - MongoDB driver for Catalog Service
    - Redis cache implementation
 
-2. **Message Queues**
+### 2. Message Queues
    - Azure Service Bus integration
-   - Event-driven communication entre servicios
+   - Event-driven communication between services
 
-3. **Authentication & Authorization**
+### 3. Authentication & Authorization
    - JWT tokens
    - Identity Service
    - API Gateway authentication
 
-4. **Monitoring & Logging**
-   - Application Insights
-   - Structured logging
-   - Distributed tracing
+### 4. .NET Aspire Integration
+   - Cloud-native orchestration for local development
+   - Service discovery and configuration management
+   - Distributed application dashboard and telemetry
+   - Simplified dependency management between microservices
 
-5. **Testing**
-   - Unit tests para cada feature
-   - Integration tests
-   - Load testing para alta demanda
+### 5. Monitoring & Observability
+   - Application Insights integration
+   - Structured logging with Serilog
+   - Distributed tracing with OpenTelemetry
+   - Health checks and metrics collection
 
-6. **DevOps**
-   - Docker containers
-   - Kubernetes deployment
-   - CI/CD pipelines
+### 6. Testing Strategy
+   - Unit tests for each feature
+   - Integration tests for API endpoints
+   - Load testing for high-demand scenarios
+   - Contract testing between services
+
+### 7. DevOps & Infrastructure
+   - Docker containers and multi-stage builds
+   - Kubernetes deployment manifests
+   - CI/CD pipelines with GitHub Actions
+   - Infrastructure as Code with Bicep/Terraform
+
+### 8. Security & Compliance
+   - HTTPS enforcement and certificate management
+   - API rate limiting and throttling
+   - Data encryption at rest and in transit
+   - GDPR compliance for user data
 
 ## Escalabilidad
 

@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using JCP.TicketWave.BookingService.Domain.Enums;
-using JCP.TicketWave.BookingService.Domain.Entities;
+using JCP.TicketWave.BookingService.Domain.Models;
 
 namespace JCP.TicketWave.BookingService.Infrastructure.Persistence.Configurations;
 

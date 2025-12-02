@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using JCP.TicketWave.BookingService.Features.Bookings.CreateBooking;
-using JCP.TicketWave.BookingService.Features.Bookings.GetBooking;
+using JCP.TicketWave.BookingService.Features.Features.Bookings.CreateBooking;
+using JCP.TicketWave.BookingService.Features.Features.Bookings.GetBooking;
 
 namespace JCP.TicketWave.BookingService.Features.Controllers;
 

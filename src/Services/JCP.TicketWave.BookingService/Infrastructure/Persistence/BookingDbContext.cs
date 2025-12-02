@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using JCP.TicketWave.BookingService.Domain.Entities;
-using JCP.TicketWave.BookingService.Infrastructure.Data.Configurations;
+using JCP.TicketWave.BookingService.Domain.Models;
+using JCP.TicketWave.BookingService.Infrastructure.Persistence.Configurations;
 
 namespace JCP.TicketWave.BookingService.Infrastructure.Persistence;
 

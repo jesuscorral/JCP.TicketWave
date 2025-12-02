@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using JCP.TicketWave.BookingService.Features.Bookings.CreateBooking;
-using JCP.TicketWave.BookingService.Features.Bookings.GetBooking;
+using JCP.TicketWave.BookingService.Features.Features.Bookings.CreateBooking;
+using JCP.TicketWave.BookingService.Features.Features.Bookings.GetBooking;
 using JCP.TicketWave.BookingService.Domain.Interfaces;
-using JCP.TicketWave.BookingService.Features.Tickets.ReserveTickets;
-using JCP.TicketWave.BookingService.Infrastructure.Data;
-using JCP.TicketWave.BookingService.Controllers;
-using JCP.TicketWave.BookingService.Infrastructure.Data.Repositories;
+using JCP.TicketWave.BookingService.Features.Features.Tickets.ReserveTickets;
+using JCP.TicketWave.BookingService.Infrastructure.Persistence;
+using JCP.TicketWave.BookingService.Features.Controllers;
+using JCP.TicketWave.BookingService.Infrastructure.Persistence.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 

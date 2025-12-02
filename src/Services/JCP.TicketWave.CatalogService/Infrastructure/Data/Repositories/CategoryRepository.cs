@@ -320,19 +320,14 @@ public class CategoryRepository : ICategoryRepository
             };
 
             var queryText = "SELECT * FROM c WHERE c.tenantId = @tenantId";
-            var queryDefinition = new QueryDefinition(queryText)
-                .WithParameter("@tenantId", partitionKey);
-
             if (isActive.HasValue)
             {
                 queryText += " AND c.isActive = @isActive";
-                queryDefinition = queryDefinition.WithParameter("@isActive", isActive.Value);
             }
-
             queryText += " ORDER BY c.displayOrder, c.name";
-            queryDefinition = new QueryDefinition(queryText)
+
+            var queryDefinition = new QueryDefinition(queryText)
                 .WithParameter("@tenantId", partitionKey);
-                
             if (isActive.HasValue)
             {
                 queryDefinition = queryDefinition.WithParameter("@isActive", isActive.Value);

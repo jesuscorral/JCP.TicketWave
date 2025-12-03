@@ -35,6 +35,12 @@ builder.Services.AddValidatorsFromAssemblyContaining<EventValidator>();
 builder.Services.AddDomainEvents();
 builder.Services.AddDomainEventHandlers(typeof(Program).Assembly);
 
+// RabbitMQ Integration Events
+builder.Services.AddRabbitMQ(builder.Configuration);
+
+// Register integration event handlers
+builder.Services.AddScoped<JCP.TicketWave.CatalogService.Application.EventHandlers.UpdateEventInventoryIntegrationEventHandler>();
+
 // Database configuration - SQL Server with EF Core
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 if (!string.IsNullOrEmpty(connectionString))

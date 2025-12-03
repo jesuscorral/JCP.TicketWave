@@ -69,7 +69,7 @@ public class CleanArchitectureTests : BaseTest
         var assemblies = new List<Assembly> {
             DomainAssembly,
             InfrastructureAssembly,
-            ApplicationAsseembly
+            ApplicationAssembly
         };
 
         foreach (var assembly in assemblies)
@@ -93,7 +93,7 @@ public class CleanArchitectureTests : BaseTest
         var assemblies = new List<Assembly> {
             DomainAssembly,
             InfrastructureAssembly,
-            ApplicationAsseembly
+            ApplicationAssembly
         };
 
         foreach (var assembly in assemblies)
@@ -114,7 +114,7 @@ public class CleanArchitectureTests : BaseTest
         {
             DomainAssembly,
             InfrastructureAssembly,
-            ApplicationAsseembly
+            ApplicationAssembly
         };
 
         foreach (var assembly in assemblies)
@@ -134,7 +134,7 @@ public class CleanArchitectureTests : BaseTest
     [Fact]
     public void Controllers_Should_Not_Access_Domain_Models_Directly()
     {
-        var result = Types.InAssembly(ApplicationAsseembly)
+        var result = Types.InAssembly(ApplicationAssembly)
             .That()
             .HaveNameEndingWith("Controller")
             .Should()
@@ -190,7 +190,7 @@ public class CleanArchitectureTests : BaseTest
     [Fact]
     public void Feature_Handlers_Should_Be_In_Features_Namespace()
     {
-        var result = Types.InAssembly(ApplicationAsseembly)
+        var result = Types.InAssembly(ApplicationAssembly)
             .That()
             .HaveNameEndingWith("Handler")
             .Should()

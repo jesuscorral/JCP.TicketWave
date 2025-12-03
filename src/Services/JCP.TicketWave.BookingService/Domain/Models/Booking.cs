@@ -1,5 +1,6 @@
 using JCP.TicketWave.Shared.Infrastructure.Domain;
 using JCP.TicketWave.BookingService.Domain.Events;
+using JCP.TicketWave.Shared.Infrastructure.Events;
 using JCP.TicketWave.BookingService.Domain.Validators;
 
 namespace JCP.TicketWave.BookingService.Domain.Models;
@@ -65,7 +66,6 @@ public class Booking : AggregateRoot
         
         // Add domain events
         booking.AddDomainEvent(new BookingCreatedDomainEvent(booking.Id, eventId, userId, quantity, totalAmount));
-        booking.AddDomainEvent(new BookingCreatedIntegrationEvent(booking.Id, eventId, userId, customerEmail, quantity, totalAmount, booking.ExpiresAt ?? DateTime.UtcNow.AddMinutes(15)));
         
         return booking;
     }

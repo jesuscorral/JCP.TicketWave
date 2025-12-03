@@ -36,6 +36,12 @@ builder.Services.AddValidatorsFromAssemblyContaining<PaymentValidator>();
 builder.Services.AddDomainEvents();
 builder.Services.AddDomainEventHandlers(typeof(Program).Assembly);
 
+// RabbitMQ Integration Events
+builder.Services.AddRabbitMQ(builder.Configuration);
+
+// Register integration event handlers
+builder.Services.AddScoped<JCP.TicketWave.PaymentService.Application.EventHandlers.PreparePaymentDataIntegrationEventHandler>();
+
 // Configure SQL Server Database
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 if (!string.IsNullOrEmpty(connectionString))

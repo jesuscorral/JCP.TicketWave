@@ -50,20 +50,3 @@ public sealed record BookingExpiredDomainEvent(
     decimal TotalAmount,
     DateTime ExpirationTime
 ) : DomainEvent;
-
-/// <summary>
-/// Evento de integración cuando un booking se confirma (para otros servicios)
-/// </summary>
-public sealed record BookingConfirmedIntegrationEvent(
-    Guid BookingId,
-    Guid EventId,
-    Guid UserId,
-    string CustomerEmail,
-    int Quantity,
-    decimal TotalAmount,
-    DateTime ConfirmedAt
-) : IntegrationEvent
-{
-    public override string EventType => "booking.confirmed";
-    public override string Source => "BookingService";
-}

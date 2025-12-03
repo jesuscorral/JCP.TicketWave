@@ -29,12 +29,18 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// Add Controllers support for the example endpoint
+builder.Services.AddControllers();
+
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<BookingValidator>();
 
 // Domain Events
 builder.Services.AddDomainEvents();
 builder.Services.AddDomainEventHandlers(typeof(Program).Assembly);
+
+// RabbitMQ Integration Events
+builder.Services.AddRabbitMQ(builder.Configuration);
 
 // Register handlers for dependency injection
 builder.Services.AddScoped<CreateBookingHandler>();
@@ -82,6 +88,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors();
+
+// Map Controllers (includes the example integration flow controller)
+app.MapControllers();
 
 // Map feature endpoints
 BookingController.MapEndpoint(app);

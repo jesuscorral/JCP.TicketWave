@@ -1,6 +1,7 @@
 using JCP.TicketWave.NotificationService;
 using JCP.TicketWave.NotificationService.Features.Email;
 using JCP.TicketWave.NotificationService.Features.Pdf;
+using JCP.TicketWave.Shared.Infrastructure.Extensions;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -11,7 +12,16 @@ builder.Services.AddHostedService<Worker>();
 builder.Services.AddScoped<SendBookingConfirmation.Handler>();
 builder.Services.AddScoped<GenerateTicketPdf.Handler>();
 
-// TODO: Add message queue services (Azure Service Bus, RabbitMQ, etc.)
+// Domain Events
+builder.Services.AddDomainEvents();
+builder.Services.AddDomainEventHandlers(typeof(Program).Assembly);
+
+// RabbitMQ Integration Events
+builder.Services.AddRabbitMQ(builder.Configuration);
+
+// Register integration event handlers
+builder.Services.AddScoped<JCP.TicketWave.NotificationService.Application.EventHandlers.SendBookingNotificationIntegrationEventHandler>();
+
 // TODO: Add email service configuration (SendGrid, SMTP, etc.)
 // TODO: Add PDF generation services (iTextSharp, PdfSharp, etc.)
 

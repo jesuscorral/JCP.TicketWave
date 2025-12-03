@@ -1,5 +1,6 @@
 using JCP.TicketWave.Shared.Infrastructure.Domain;
 using JCP.TicketWave.BookingService.Domain.Events;
+using JCP.TicketWave.Shared.Infrastructure.Events;
 using JCP.TicketWave.BookingService.Domain.Validators;
 
 namespace JCP.TicketWave.BookingService.Domain.Models;
@@ -63,7 +64,7 @@ public class Booking : AggregateRoot
 
         var booking = new Booking(eventId, userId, customerEmail, quantity, totalAmount, expiresAt);
         
-        // Add domain event
+        // Add domain events
         booking.AddDomainEvent(new BookingCreatedDomainEvent(booking.Id, eventId, userId, quantity, totalAmount));
         
         return booking;
@@ -81,7 +82,9 @@ public class Booking : AggregateRoot
         Status = BookingStatus.Confirmed;
         MarkAsModified();
         
+        // Add domain events
         AddDomainEvent(new BookingConfirmedDomainEvent(Id, EventId, UserId));
+        AddDomainEvent(new BookingConfirmedIntegrationEvent(Id, EventId, UserId, CustomerEmail, Quantity, TotalAmount, DateTime.UtcNow));
     }
 
     public void Cancel(string reason = "")
@@ -95,7 +98,9 @@ public class Booking : AggregateRoot
         Status = BookingStatus.Cancelled;
         MarkAsModified();
         
+        // Add domain events
         AddDomainEvent(new BookingCancelledDomainEvent(Id, EventId, reason));
+        AddDomainEvent(new BookingCancelledIntegrationEvent(Id, EventId, UserId, reason, DateTime.UtcNow));
     }
 
     public void Complete()
@@ -106,7 +111,21 @@ public class Booking : AggregateRoot
         Status = BookingStatus.Completed;
         MarkAsModified();
         
+        // Add domain events
         AddDomainEvent(new BookingCompletedDomainEvent(Id, EventId, TotalAmount));
+        AddDomainEvent(new BookingCompletedIntegrationEvent(Id, EventId, UserId, TotalAmount, DateTime.UtcNow));
+    }
+
+    public void Expire()
+    {
+        if (Status != BookingStatus.Pending)
+            throw new DomainException($"Cannot expire booking in {Status} status");
+
+        Status = BookingStatus.Cancelled;
+        MarkAsModified();
+
+        // Add domain event
+        AddDomainEvent(new BookingExpiredDomainEvent(Id, EventId, UserId, CustomerEmail, Quantity, TotalAmount, DateTime.UtcNow));
     }
 
     public void AddTicket(Ticket ticket)

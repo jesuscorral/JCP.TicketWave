@@ -29,7 +29,6 @@
     <ProjectReference Include="..\..\src\Services\JCP.TicketWave.PaymentService\JCP.TicketWave.PaymentService.csproj" />
     <ProjectReference Include="..\..\src\Services\JCP.TicketWave.NotificationService\JCP.TicketWave.NotificationService.csproj" />
     <ProjectReference Include="..\..\src\Gateway\JCP.TicketWave.Gateway\JCP.TicketWave.Gateway.csproj" />
-    <ProjectReference Include="..\..\src\Shared\JCP.TicketWave.Shared.Contracts\JCP.TicketWave.Shared.Contracts.csproj" />
     <ProjectReference Include="..\..\src\Shared\JCP.TicketWave.Shared.Infrastructure\JCP.TicketWave.Shared.Infrastructure.csproj" />
   </ItemGroup>
 

@@ -1,5 +1,6 @@
 using JCP.TicketWave.Shared.Infrastructure.Domain;
 using JCP.TicketWave.PaymentService.Domain.Validators;
+using JCP.TicketWave.PaymentService.Domain.Events;
 
 namespace JCP.TicketWave.PaymentService.Domain.Models;
 
@@ -65,6 +66,10 @@ public class Payment : AggregateRoot
             tenantId ?? "default");
 
         payment.AddEvent("Payment created", PaymentEventType.Created);
+        
+        // Add domain event
+        payment.AddDomainEvent(new PaymentInitiatedDomainEvent(payment.Id, bookingId, amount, currency, paymentMethod.Id, paymentMethod.Provider ?? string.Empty, DateTime.UtcNow));
+        
         return payment;
     }
 
@@ -78,6 +83,9 @@ public class Payment : AggregateRoot
         MarkAsModified();
         
         AddEvent($"Payment processing started with external ID: {externalPaymentId}", PaymentEventType.Processing);
+        
+        // Add domain event
+        AddDomainEvent(new PaymentProcessedDomainEvent(Id, BookingId, Amount, Currency, externalPaymentId, PaymentMethod.Provider ?? string.Empty, DateTime.UtcNow));
     }
 
     public void MarkAsSucceeded()
@@ -91,6 +99,10 @@ public class Payment : AggregateRoot
         MarkAsModified();
         
         AddEvent("Payment succeeded", PaymentEventType.Succeeded);
+        
+        // Add domain events
+        AddDomainEvent(new PaymentCompletedDomainEvent(Id, BookingId, Amount, Currency, ExternalPaymentId ?? string.Empty, DateTime.UtcNow));
+        AddDomainEvent(new PaymentCompletedIntegrationEvent(Id, BookingId, Amount, Currency, ExternalPaymentId ?? string.Empty, DateTime.UtcNow));
     }
 
     public void MarkAsFailed(string failureReason)
@@ -104,6 +116,10 @@ public class Payment : AggregateRoot
         MarkAsModified();
         
         AddEvent($"Payment failed: {failureReason}", PaymentEventType.Failed);
+        
+        // Add domain events
+        AddDomainEvent(new PaymentFailedDomainEvent(Id, BookingId, Amount, Currency, failureReason, "PAYMENT_FAILED", DateTime.UtcNow));
+        AddDomainEvent(new PaymentFailedIntegrationEvent(Id, BookingId, Amount, Currency, failureReason, DateTime.UtcNow));
     }
 
     public void MarkAsRefunded()

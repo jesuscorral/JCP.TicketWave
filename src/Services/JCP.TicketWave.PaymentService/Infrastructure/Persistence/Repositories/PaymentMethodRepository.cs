@@ -97,7 +97,7 @@ public class PaymentMethodRepository : IPaymentMethodRepository
                 .ToListAsync(cancellationToken);
             foreach (var pm in currentDefaults)
             {
-                pm.IsDefault = false;
+                pm.RemoveAsDefault();
             }
 
             // Set the specified payment method as default
@@ -105,7 +105,7 @@ public class PaymentMethodRepository : IPaymentMethodRepository
                 .FirstOrDefaultAsync(pm => pm.Id == paymentMethodId && pm.UserId == userId, cancellationToken);
             if (newDefault != null)
             {
-                newDefault.IsDefault = true;
+                newDefault.SetAsDefault();
             }
 
             await _context.SaveChangesAsync(cancellationToken);

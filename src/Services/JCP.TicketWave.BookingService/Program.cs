@@ -8,6 +8,7 @@ using JCP.TicketWave.BookingService.Application.Features.Bookings.GetBooking;
 using JCP.TicketWave.BookingService.Application.Features.Bookings.CreateBooking;
 using JCP.TicketWave.BookingService.Application.Features.Tickets.ReserveTickets;
 using JCP.TicketWave.BookingService.Domain.Validators;
+using JCP.TicketWave.Shared.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,8 +29,18 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// Add Controllers support for the example endpoint
+builder.Services.AddControllers();
+
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<BookingValidator>();
+
+// Domain Events
+builder.Services.AddDomainEvents();
+builder.Services.AddDomainEventHandlers(typeof(Program).Assembly);
+
+// RabbitMQ Integration Events
+builder.Services.AddRabbitMQ(builder.Configuration);
 
 // Register handlers for dependency injection
 builder.Services.AddScoped<CreateBookingHandler>();
@@ -77,6 +88,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors();
+
+// Map Controllers (includes the example integration flow controller)
+app.MapControllers();
 
 // Map feature endpoints
 BookingController.MapEndpoint(app);

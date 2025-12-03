@@ -8,6 +8,7 @@ using JCP.TicketWave.CatalogService.Application.Features.Events.GetEventById;
 using JCP.TicketWave.CatalogService.Application.Features.Events.GetEvents;
 using JCP.TicketWave.CatalogService.Application.Features.Categories.GetCategories;
 using JCP.TicketWave.CatalogService.Domain.Validators;
+using JCP.TicketWave.Shared.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,16 @@ builder.Services.AddSwaggerGen(c =>
 
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<EventValidator>();
+
+// Domain Events
+builder.Services.AddDomainEvents();
+builder.Services.AddDomainEventHandlers(typeof(Program).Assembly);
+
+// RabbitMQ Integration Events
+builder.Services.AddRabbitMQ(builder.Configuration);
+
+// Register integration event handlers
+builder.Services.AddScoped<JCP.TicketWave.CatalogService.Application.EventHandlers.UpdateEventInventoryIntegrationEventHandler>();
 
 // Database configuration - SQL Server with EF Core
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

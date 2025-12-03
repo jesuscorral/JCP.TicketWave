@@ -12,6 +12,7 @@ public class PaymentMethod : BaseEntity
     public string? ExpiryMonth { get; private set; } // For cards
     public string? ExpiryYear { get; private set; } // For cards
     public string? CardBrand { get; private set; } // Visa, MasterCard, etc.
+    public string? Provider { get; private set; } = "Stripe"; // Payment processor
     public string? ExternalMethodId { get; private set; } // Stripe payment method ID
     public bool IsDefault { get; private set; }
     public bool IsActive { get; private set; } = true;
@@ -50,6 +51,7 @@ public class PaymentMethod : BaseEntity
         ExpiryMonth = expiryMonth;
         ExpiryYear = expiryYear;
         CardBrand = cardBrand;
+        Provider = "Stripe";
         ExternalMethodId = externalMethodId;
         IsActive = true;
     }
@@ -72,6 +74,7 @@ public class PaymentMethod : BaseEntity
         UserId = userId;
         Type = type;
         DisplayName = displayName;
+        Provider = type == PaymentMethodType.PayPal ? "PayPal" : "Stripe";
         ExternalMethodId = externalMethodId;
         IsActive = true;
     }

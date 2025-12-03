@@ -3,7 +3,7 @@ using JCP.TicketWave.BookingService.Domain.Events;
 
 namespace JCP.TicketWave.BookingService.Domain.Models;
 
-public class Ticket : AggregateRoot
+public class Ticket : BaseEntity
 {
     public Guid EventId { get; private set; }
     public Guid? BookingId { get; private set; }

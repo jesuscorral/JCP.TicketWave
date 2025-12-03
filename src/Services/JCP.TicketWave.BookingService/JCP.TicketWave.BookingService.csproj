@@ -17,4 +17,8 @@
     <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Shared\JCP.TicketWave.Shared.Infrastructure\JCP.TicketWave.Shared.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

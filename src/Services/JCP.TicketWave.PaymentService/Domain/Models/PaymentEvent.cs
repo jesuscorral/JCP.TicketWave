@@ -1,8 +1,9 @@
+using JCP.TicketWave.Shared.Infrastructure.Domain;
+
 namespace JCP.TicketWave.PaymentService.Domain.Models;
 
-public class PaymentEvent
+public class PaymentEvent : BaseEntity
 {
-    public Guid Id { get; private set; } = Guid.NewGuid();
     public Guid PaymentId { get; private set; }
     public string Description { get; private set; } = string.Empty;
     public PaymentEventType EventType { get; private set; }
@@ -13,7 +14,27 @@ public class PaymentEvent
     public Payment Payment { get; private set; } = null!;
 
     // Private constructor for EF Core
-    private PaymentEvent() { }
+    private PaymentEvent() : base() { }
+
+    // Private constructor for factory method
+    private PaymentEvent(
+        Guid paymentId,
+        string description,
+        PaymentEventType eventType,
+        string? metadata) : base()
+    {
+        if (paymentId == Guid.Empty)
+            throw new DomainException("Payment ID is required");
+        
+        if (string.IsNullOrWhiteSpace(description))
+            throw new DomainException("Description is required");
+
+        PaymentId = paymentId;
+        Description = description;
+        EventType = eventType;
+        OccurredAt = DateTime.UtcNow;
+        Metadata = metadata;
+    }
 
     // Factory method
     public static PaymentEvent Create(
@@ -22,20 +43,6 @@ public class PaymentEvent
         PaymentEventType eventType,
         string? metadata = null)
     {
-        if (paymentId == Guid.Empty)
-            throw new ArgumentException("Payment ID is required", nameof(paymentId));
-        
-        if (string.IsNullOrWhiteSpace(description))
-            throw new ArgumentException("Description is required", nameof(description));
-
-        return new PaymentEvent
-        {
-            Id = Guid.NewGuid(),
-            PaymentId = paymentId,
-            Description = description,
-            EventType = eventType,
-            OccurredAt = DateTime.UtcNow,
-            Metadata = metadata
-        };
+        return new PaymentEvent(paymentId, description, eventType, metadata);
     }
 }

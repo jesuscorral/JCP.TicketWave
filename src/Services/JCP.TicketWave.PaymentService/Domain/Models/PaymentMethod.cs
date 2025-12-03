@@ -1,8 +1,9 @@
+using JCP.TicketWave.Shared.Infrastructure.Domain;
+
 namespace JCP.TicketWave.PaymentService.Domain.Models;
 
-public class PaymentMethod
+public class PaymentMethod : BaseEntity
 {
-    public Guid Id { get; private set; } = Guid.NewGuid();
     public string TenantId { get; private set; } = "default";
     public Guid? UserId { get; private set; } // Optional: for registered users
     public PaymentMethodType Type { get; private set; }
@@ -14,11 +15,66 @@ public class PaymentMethod
     public string? ExternalMethodId { get; private set; } // Stripe payment method ID
     public bool IsDefault { get; private set; }
     public bool IsActive { get; private set; } = true;
-    public DateTime CreatedAt { get; private set; }
-    public DateTime? UpdatedAt { get; private set; }
 
     // Private constructor for EF Core
-    private PaymentMethod() { }
+    private PaymentMethod() : base() { }
+
+    // Private constructor for card
+    private PaymentMethod(
+        string tenantId,
+        Guid? userId,
+        string displayName,
+        string last4Digits,
+        string expiryMonth,
+        string expiryYear,
+        string cardBrand,
+        string? externalMethodId) : base()
+    {
+        if (string.IsNullOrWhiteSpace(displayName))
+            throw new DomainException("Display name is required");
+        
+        if (string.IsNullOrWhiteSpace(last4Digits) || last4Digits.Length != 4)
+            throw new DomainException("Last 4 digits must be exactly 4 characters");
+        
+        if (string.IsNullOrWhiteSpace(expiryMonth))
+            throw new DomainException("Expiry month is required");
+        
+        if (string.IsNullOrWhiteSpace(expiryYear))
+            throw new DomainException("Expiry year is required");
+
+        TenantId = tenantId;
+        UserId = userId;
+        Type = PaymentMethodType.Card;
+        DisplayName = displayName;
+        Last4Digits = last4Digits;
+        ExpiryMonth = expiryMonth;
+        ExpiryYear = expiryYear;
+        CardBrand = cardBrand;
+        ExternalMethodId = externalMethodId;
+        IsActive = true;
+    }
+
+    // Private constructor for digital wallet
+    private PaymentMethod(
+        string tenantId,
+        Guid? userId,
+        PaymentMethodType type,
+        string displayName,
+        string? externalMethodId) : base()
+    {
+        if (type == PaymentMethodType.Card)
+            throw new DomainException("Use CreateCard method for card payment methods");
+        
+        if (string.IsNullOrWhiteSpace(displayName))
+            throw new DomainException("Display name is required");
+
+        TenantId = tenantId;
+        UserId = userId;
+        Type = type;
+        DisplayName = displayName;
+        ExternalMethodId = externalMethodId;
+        IsActive = true;
+    }
 
     // Factory method for card payment method
     public static PaymentMethod CreateCard(
@@ -31,32 +87,15 @@ public class PaymentMethod
         Guid? userId = null,
         string? tenantId = null)
     {
-        if (string.IsNullOrWhiteSpace(displayName))
-            throw new ArgumentException("Display name is required", nameof(displayName));
-        
-        if (string.IsNullOrWhiteSpace(last4Digits) || last4Digits.Length != 4)
-            throw new ArgumentException("Last 4 digits must be exactly 4 characters", nameof(last4Digits));
-        
-        if (string.IsNullOrWhiteSpace(expiryMonth))
-            throw new ArgumentException("Expiry month is required", nameof(expiryMonth));
-        
-        if (string.IsNullOrWhiteSpace(expiryYear))
-            throw new ArgumentException("Expiry year is required", nameof(expiryYear));
-
-        return new PaymentMethod
-        {
-            Id = Guid.NewGuid(),
-            TenantId = tenantId ?? "default",
-            UserId = userId,
-            Type = PaymentMethodType.Card,
-            DisplayName = displayName,
-            Last4Digits = last4Digits,
-            ExpiryMonth = expiryMonth,
-            ExpiryYear = expiryYear,
-            CardBrand = cardBrand,
-            ExternalMethodId = externalMethodId,
-            CreatedAt = DateTime.UtcNow
-        };
+        return new PaymentMethod(
+            tenantId ?? "default",
+            userId,
+            displayName,
+            last4Digits,
+            expiryMonth,
+            expiryYear,
+            cardBrand,
+            externalMethodId);
     }
 
     // Factory method for digital wallet (PayPal, Apple Pay, etc.)
@@ -67,47 +106,37 @@ public class PaymentMethod
         Guid? userId = null,
         string? tenantId = null)
     {
-        if (type == PaymentMethodType.Card)
-            throw new ArgumentException("Use CreateCard method for card payment methods", nameof(type));
-        
-        if (string.IsNullOrWhiteSpace(displayName))
-            throw new ArgumentException("Display name is required", nameof(displayName));
-
-        return new PaymentMethod
-        {
-            Id = Guid.NewGuid(),
-            TenantId = tenantId ?? "default",
-            UserId = userId,
-            Type = type,
-            DisplayName = displayName,
-            ExternalMethodId = externalMethodId,
-            CreatedAt = DateTime.UtcNow
-        };
+        return new PaymentMethod(
+            tenantId ?? "default",
+            userId,
+            type,
+            displayName,
+            externalMethodId);
     }
 
     public void SetAsDefault()
     {
         IsDefault = true;
-        UpdatedAt = DateTime.UtcNow;
+        UpdateTimestamp();
     }
 
     public void RemoveAsDefault()
     {
         IsDefault = false;
-        UpdatedAt = DateTime.UtcNow;
+        UpdateTimestamp();
     }
 
     public void Deactivate()
     {
         IsActive = false;
         IsDefault = false;
-        UpdatedAt = DateTime.UtcNow;
+        UpdateTimestamp();
     }
 
     public void Activate()
     {
         IsActive = true;
-        UpdatedAt = DateTime.UtcNow;
+        UpdateTimestamp();
     }
 
     public string GetMaskedDisplayName()

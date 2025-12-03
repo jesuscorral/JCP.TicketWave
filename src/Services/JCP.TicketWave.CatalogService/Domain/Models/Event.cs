@@ -1,8 +1,9 @@
+using JCP.TicketWave.Shared.Infrastructure.Domain;
+
 namespace JCP.TicketWave.CatalogService.Domain.Models;
 
-public class Event
+public class Event : AggregateRoot
 {
-    public Guid Id { get; private set; } = Guid.NewGuid();
     public string TenantId { get; private set; } = string.Empty;
     public string Title { get; private set; } = string.Empty;
     public string? Description { get; private set; }
@@ -17,15 +18,58 @@ public class Event
     public string Currency { get; private set; } = "EUR";
     public string? ImageUrl { get; private set; }
     public string? ExternalUrl { get; private set; }
-    public DateTime CreatedAt { get; private set; }
-    public DateTime? UpdatedAt { get; private set; }
     
     // Navigation properties
     public Category? Category { get; private set; }
     public Venue? Venue { get; private set; }
 
     // Private constructor for EF Core
-    private Event() { }
+    private Event() : base() { }
+
+    // Private constructor for factory method
+    private Event(
+        string tenantId,
+        string title,
+        string? description,
+        DateTime startDateTime,
+        DateTime endDateTime,
+        Guid categoryId,
+        Guid venueId,
+        int availableTickets,
+        decimal ticketPrice,
+        string currency,
+        string? imageUrl,
+        string? externalUrl) : base()
+    {
+        if (string.IsNullOrWhiteSpace(tenantId))
+            throw new DomainException("Tenant ID is required");
+        
+        if (string.IsNullOrWhiteSpace(title))
+            throw new DomainException("Event title is required");
+        
+        if (startDateTime >= endDateTime)
+            throw new DomainException("Start date must be before end date");
+        
+        if (availableTickets < 0)
+            throw new DomainException("Available tickets cannot be negative");
+        
+        if (ticketPrice < 0)
+            throw new DomainException("Ticket price cannot be negative");
+
+        TenantId = tenantId;
+        Title = title;
+        Description = description;
+        StartDateTime = startDateTime;
+        EndDateTime = endDateTime;
+        CategoryId = categoryId;
+        VenueId = venueId;
+        Status = EventStatus.Draft;
+        AvailableTickets = availableTickets;
+        TicketPrice = ticketPrice;
+        Currency = currency;
+        ImageUrl = imageUrl;
+        ExternalUrl = externalUrl;
+    }
 
     // Factory method for creating new events
     public static Event Create(
@@ -42,53 +86,60 @@ public class Event
         string? imageUrl = null,
         string? externalUrl = null)
     {
-        return new Event
-        {
-            Id = Guid.NewGuid(),
-            TenantId = tenantId,
-            Title = title,
-            Description = description,
-            StartDateTime = startDateTime,
-            EndDateTime = endDateTime,
-            CategoryId = categoryId,
-            VenueId = venueId,
-            Status = EventStatus.Draft,
-            AvailableTickets = availableTickets,
-            TicketPrice = ticketPrice,
-            Currency = currency,
-            ImageUrl = imageUrl,
-            ExternalUrl = externalUrl,
-            CreatedAt = DateTime.UtcNow
-        };
+        return new Event(
+            tenantId,
+            title,
+            description,
+            startDateTime,
+            endDateTime,
+            categoryId,
+            venueId,
+            availableTickets,
+            ticketPrice,
+            currency,
+            imageUrl,
+            externalUrl);
     }
 
     // Business methods
     public void UpdateDetails(string title, string? description, string? imageUrl = null)
     {
+        if (string.IsNullOrWhiteSpace(title))
+            throw new DomainException("Event title is required");
+
         Title = title;
         Description = description;
         ImageUrl = imageUrl;
-        UpdatedAt = DateTime.UtcNow;
+        MarkAsModified();
     }
 
     public void UpdateSchedule(DateTime startDateTime, DateTime endDateTime)
     {
+        if (startDateTime >= endDateTime)
+            throw new DomainException("Start date must be before end date");
+
         StartDateTime = startDateTime;
         EndDateTime = endDateTime;
-        UpdatedAt = DateTime.UtcNow;
+        MarkAsModified();
     }
 
     public void UpdatePricing(decimal ticketPrice, decimal? maxPrice = null)
     {
+        if (ticketPrice < 0)
+            throw new DomainException("Ticket price cannot be negative");
+
         TicketPrice = ticketPrice;
         MaxPrice = maxPrice;
-        UpdatedAt = DateTime.UtcNow;
+        MarkAsModified();
     }
 
     public void UpdateAvailableTickets(int availableTickets)
     {
+        if (availableTickets < 0)
+            throw new DomainException("Available tickets cannot be negative");
+
         AvailableTickets = availableTickets;
-        UpdatedAt = DateTime.UtcNow;
+        MarkAsModified();
     }
 
     public void Publish()
@@ -96,7 +147,7 @@ public class Event
         if (Status == EventStatus.Draft)
         {
             Status = EventStatus.Published;
-            UpdatedAt = DateTime.UtcNow;
+            MarkAsModified();
         }
     }
 
@@ -105,7 +156,7 @@ public class Event
         if (Status != EventStatus.Completed)
         {
             Status = EventStatus.Cancelled;
-            UpdatedAt = DateTime.UtcNow;
+            MarkAsModified();
         }
     }
 
@@ -114,7 +165,7 @@ public class Event
         if (Status == EventStatus.Published && DateTime.UtcNow > EndDateTime)
         {
             Status = EventStatus.Completed;
-            UpdatedAt = DateTime.UtcNow;
+            MarkAsModified();
         }
     }
 }

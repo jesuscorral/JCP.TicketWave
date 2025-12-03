@@ -1,23 +1,41 @@
+using JCP.TicketWave.Shared.Infrastructure.Domain;
+using JCP.TicketWave.BookingService.Domain.Events;
+
 namespace JCP.TicketWave.BookingService.Domain.Models;
 
-public class Booking
+public class Booking : AggregateRoot
 {
-    public Guid Id { get; private set; } = Guid.NewGuid();
     public Guid EventId { get; private set; }
     public Guid UserId { get; private set; }
     public string CustomerEmail { get; private set; } = string.Empty;
     public int Quantity { get; private set; }
     public decimal TotalAmount { get; private set; }
     public BookingStatus Status { get; private set; }
-    public DateTime CreatedAt { get; private set; }
     public DateTime? ExpiresAt { get; private set; }
-    public DateTime? UpdatedAt { get; private set; }
     
     // Navigation property
     public List<Ticket> Tickets { get; private set; } = new();
 
     // Private constructor for EF Core
-    private Booking() { }
+    private Booking() : base() { }
+
+    // Private constructor for factory method
+    private Booking(
+        Guid eventId,
+        Guid userId,
+        string customerEmail,
+        int quantity,
+        decimal totalAmount,
+        DateTime? expiresAt) : base()
+    {
+        EventId = eventId;
+        UserId = userId;
+        CustomerEmail = customerEmail;
+        Quantity = quantity;
+        TotalAmount = totalAmount;
+        Status = BookingStatus.Pending;
+        ExpiresAt = expiresAt ?? DateTime.UtcNow.AddMinutes(15);
+    }
 
     // Factory method for creating new bookings
     public static Booking Create(
@@ -29,39 +47,35 @@ public class Booking
         DateTime? expiresAt = null)
     {
         if (string.IsNullOrWhiteSpace(customerEmail))
-            throw new ArgumentException("Customer email is required", nameof(customerEmail));
+            throw new DomainException("Customer email is required");
         
         if (quantity <= 0)
-            throw new ArgumentException("Quantity must be greater than zero", nameof(quantity));
+            throw new DomainException("Quantity must be greater than zero");
         
         if (totalAmount < 0)
-            throw new ArgumentException("Total amount cannot be negative", nameof(totalAmount));
+            throw new DomainException("Total amount cannot be negative");
 
-        return new Booking
-        {
-            Id = Guid.NewGuid(),
-            EventId = eventId,
-            UserId = userId,
-            CustomerEmail = customerEmail,
-            Quantity = quantity,
-            TotalAmount = totalAmount,
-            Status = BookingStatus.Pending,
-            CreatedAt = DateTime.UtcNow,
-            ExpiresAt = expiresAt ?? DateTime.UtcNow.AddMinutes(15) // 15 minutes default expiration
-        };
+        var booking = new Booking(eventId, userId, customerEmail, quantity, totalAmount, expiresAt);
+        
+        // Add domain event
+        booking.AddDomainEvent(new BookingCreatedDomainEvent(booking.Id, eventId, userId, quantity, totalAmount));
+        
+        return booking;
     }
 
     // Business methods
     public void Confirm()
     {
         if (Status != BookingStatus.Pending)
-            throw new InvalidOperationException($"Cannot confirm booking in {Status} status");
+            throw new DomainException($"Cannot confirm booking in {Status} status");
         
         if (ExpiresAt.HasValue && DateTime.UtcNow > ExpiresAt.Value)
-            throw new InvalidOperationException("Cannot confirm expired booking");
+            throw new DomainException("Cannot confirm expired booking");
 
         Status = BookingStatus.Confirmed;
-        UpdatedAt = DateTime.UtcNow;
+        MarkAsModified();
+        
+        AddDomainEvent(new BookingConfirmedDomainEvent(Id, EventId, UserId));
     }
 
     public void Cancel(string reason = "")
@@ -70,27 +84,32 @@ public class Booking
             return; // Already cancelled
 
         if (Status == BookingStatus.Completed)
-            throw new InvalidOperationException("Cannot cancel completed booking");
+            throw new DomainException("Cannot cancel completed booking");
 
         Status = BookingStatus.Cancelled;
-        UpdatedAt = DateTime.UtcNow;
+        MarkAsModified();
+        
+        AddDomainEvent(new BookingCancelledDomainEvent(Id, EventId, reason));
     }
 
     public void Complete()
     {
         if (Status != BookingStatus.Confirmed)
-            throw new InvalidOperationException($"Cannot complete booking in {Status} status");
+            throw new DomainException($"Cannot complete booking in {Status} status");
 
         Status = BookingStatus.Completed;
-        UpdatedAt = DateTime.UtcNow;
+        MarkAsModified();
+        
+        AddDomainEvent(new BookingCompletedDomainEvent(Id, EventId, TotalAmount));
     }
 
     public void AddTicket(Ticket ticket)
     {
         if (ticket.BookingId != Id)
-            throw new ArgumentException("Ticket booking ID does not match", nameof(ticket));
+            throw new DomainException("Ticket booking ID does not match");
 
         Tickets.Add(ticket);
+        MarkAsModified();
     }
 
     public bool IsExpired => ExpiresAt.HasValue && DateTime.UtcNow > ExpiresAt.Value;

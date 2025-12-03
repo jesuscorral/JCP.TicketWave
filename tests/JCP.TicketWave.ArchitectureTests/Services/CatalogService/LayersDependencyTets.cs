@@ -13,7 +13,7 @@ namespace JCP.TicketWave.ArchitectureTests.Services.CatalogService;
 public class CleanArchitectureTests : BaseTest
 {
     [Fact]
-    public void Domain_Should_NotHAveDependencies_On_Other_Layers()
+    public void Domain_Should_NotHaveDependencies_On_Other_Layers()
     {
         var result = Types.InAssembly(DomainAssembly)
             .That()

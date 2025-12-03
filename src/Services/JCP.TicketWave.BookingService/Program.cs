@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using FluentValidation;
 using JCP.TicketWave.BookingService.Domain.Interfaces;
 using JCP.TicketWave.BookingService.Infrastructure.Persistence;
 using JCP.TicketWave.BookingService.Infrastructure.Persistence.Repositories;
@@ -6,6 +7,7 @@ using JCP.TicketWave.BookingService.Application.Controllers;
 using JCP.TicketWave.BookingService.Application.Features.Bookings.GetBooking;
 using JCP.TicketWave.BookingService.Application.Features.Bookings.CreateBooking;
 using JCP.TicketWave.BookingService.Application.Features.Tickets.ReserveTickets;
+using JCP.TicketWave.BookingService.Domain.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +27,9 @@ builder.Services.AddSwaggerGen(c =>
         return type.Name;
     });
 });
+
+// FluentValidation
+builder.Services.AddValidatorsFromAssemblyContaining<BookingValidator>();
 
 // Register handlers for dependency injection
 builder.Services.AddScoped<CreateBookingHandler>();

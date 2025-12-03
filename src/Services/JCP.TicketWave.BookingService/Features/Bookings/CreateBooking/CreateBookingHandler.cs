@@ -1,7 +1,8 @@
 using JCP.TicketWave.BookingService.Domain.Interfaces;
 using JCP.TicketWave.BookingService.Domain.Models;
+using JCP.TicketWave.BookingService.Application.Features.Bookings.CreateBooking;
 
-namespace JCP.TicketWave.BookingService.Application.Features.Bookings.CreateBooking;
+namespace JCP.TicketWave.BookingService.Features.Bookings.CreateBooking;
 
 public class CreateBookingHandler
 {
@@ -29,7 +30,7 @@ public class CreateBookingHandler
         return new CreateBookingResponse(
             BookingId: booking.Id,
             BookingReference: booking.Id.ToString()[..8], // Use part of ID as reference
-            Status: (BookingStatus)(int)booking.Status,
+            Status: (Application.Features.Bookings.CreateBooking.BookingStatus)(int)booking.Status,
             CreatedAt: booking.CreatedAt,
             ExpiresAt: booking.ExpiresAt ?? DateTime.UtcNow.AddMinutes(15));
     }

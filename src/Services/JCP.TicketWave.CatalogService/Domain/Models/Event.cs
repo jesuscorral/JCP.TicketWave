@@ -1,4 +1,5 @@
 using JCP.TicketWave.Shared.Infrastructure.Domain;
+using JCP.TicketWave.CatalogService.Domain.Validators;
 
 namespace JCP.TicketWave.CatalogService.Domain.Models;
 
@@ -41,21 +42,6 @@ public class Event : AggregateRoot
         string? imageUrl,
         string? externalUrl) : base()
     {
-        if (string.IsNullOrWhiteSpace(tenantId))
-            throw new DomainException("Tenant ID is required");
-        
-        if (string.IsNullOrWhiteSpace(title))
-            throw new DomainException("Event title is required");
-        
-        if (startDateTime >= endDateTime)
-            throw new DomainException("Start date must be before end date");
-        
-        if (availableTickets < 0)
-            throw new DomainException("Available tickets cannot be negative");
-        
-        if (ticketPrice < 0)
-            throw new DomainException("Ticket price cannot be negative");
-
         TenantId = tenantId;
         Title = title;
         Description = description;
@@ -86,6 +72,22 @@ public class Event : AggregateRoot
         string? imageUrl = null,
         string? externalUrl = null)
     {
+        // Create validation request
+        var validationRequest = new CreateEventRequest(
+            tenantId, title, description, startDateTime, endDateTime,
+            categoryId, venueId, availableTickets, ticketPrice, null,
+            currency, imageUrl, externalUrl);
+
+        // Validate using FluentValidation
+        var validator = new EventValidator();
+        var validationResult = validator.Validate(validationRequest);
+
+        if (!validationResult.IsValid)
+        {
+            var errors = string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage));
+            throw new DomainException($"Event validation failed: {errors}");
+        }
+
         return new Event(
             tenantId,
             title,

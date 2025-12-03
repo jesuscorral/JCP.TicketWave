@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore;
+using FluentValidation;
 using JCP.TicketWave.CatalogService.Domain.Interfaces;
 using JCP.TicketWave.CatalogService.Infrastructure.Persistence;
 using JCP.TicketWave.CatalogService.Infrastructure.Persistence.Repositories;
-using JCP.TicketWave.CatalogService.Application.Features.Events.GetEventById;
 using JCP.TicketWave.CatalogService.Application.Controllers;
+using JCP.TicketWave.CatalogService.Application.Features.Events.GetEventById;
 using JCP.TicketWave.CatalogService.Application.Features.Events.GetEvents;
 using JCP.TicketWave.CatalogService.Application.Features.Categories.GetCategories;
+using JCP.TicketWave.CatalogService.Domain.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +26,9 @@ builder.Services.AddSwaggerGen(c =>
         return type.Name;
     });
 });
+
+// FluentValidation
+builder.Services.AddValidatorsFromAssemblyContaining<EventValidator>();
 
 // Database configuration - SQL Server with EF Core
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

@@ -1,4 +1,5 @@
 using JCP.TicketWave.Shared.Infrastructure.Domain;
+using JCP.TicketWave.PaymentService.Domain.Validators;
 
 namespace JCP.TicketWave.PaymentService.Domain.Models;
 
@@ -26,18 +27,6 @@ public class Payment : AggregateRoot
         PaymentMethod paymentMethod,
         string tenantId) : base()
     {
-        if (bookingId == Guid.Empty)
-            throw new DomainException("Booking ID is required");
-        
-        if (amount <= 0)
-            throw new DomainException("Amount must be greater than zero");
-        
-        if (string.IsNullOrWhiteSpace(currency))
-            throw new DomainException("Currency is required");
-        
-        if (paymentMethod == null)
-            throw new DomainException("Payment method is required");
-
         TenantId = tenantId;
         BookingId = bookingId;
         Amount = amount;
@@ -54,6 +43,20 @@ public class Payment : AggregateRoot
         PaymentMethod paymentMethod,
         string? tenantId = null)
     {
+        // Create validation request
+        var validationRequest = new CreatePaymentRequest(
+            bookingId, amount, currency, paymentMethod.Id);
+
+        // Validate using FluentValidation
+        var validator = new PaymentValidator();
+        var validationResult = validator.Validate(validationRequest);
+
+        if (!validationResult.IsValid)
+        {
+            var errors = string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage));
+            throw new DomainException($"Payment validation failed: {errors}");
+        }
+
         var payment = new Payment(
             bookingId,
             amount,

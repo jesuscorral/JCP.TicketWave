@@ -1,5 +1,6 @@
 using JCP.TicketWave.Shared.Infrastructure.Domain;
 using JCP.TicketWave.BookingService.Domain.Events;
+using JCP.TicketWave.BookingService.Domain.Validators;
 
 namespace JCP.TicketWave.BookingService.Domain.Models;
 
@@ -46,14 +47,19 @@ public class Booking : AggregateRoot
         decimal totalAmount,
         DateTime? expiresAt = null)
     {
-        if (string.IsNullOrWhiteSpace(customerEmail))
-            throw new DomainException("Customer email is required");
-        
-        if (quantity <= 0)
-            throw new DomainException("Quantity must be greater than zero");
-        
-        if (totalAmount < 0)
-            throw new DomainException("Total amount cannot be negative");
+        // Create validation request
+        var validationRequest = new CreateBookingRequest(
+            eventId, userId, customerEmail, quantity, totalAmount, expiresAt);
+
+        // Validate using FluentValidation
+        var validator = new BookingValidator();
+        var validationResult = validator.Validate(validationRequest);
+
+        if (!validationResult.IsValid)
+        {
+            var errors = string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage));
+            throw new DomainException($"Booking validation failed: {errors}");
+        }
 
         var booking = new Booking(eventId, userId, customerEmail, quantity, totalAmount, expiresAt);
         

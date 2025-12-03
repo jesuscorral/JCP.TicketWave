@@ -1,22 +1,46 @@
+using JCP.TicketWave.BookingService.Domain.Interfaces;
+using JCP.TicketWave.BookingService.Domain.Models;
+
 namespace JCP.TicketWave.BookingService.Application.Features.Tickets.ReserveTickets;
 
 public class ReserveTicketsHandler
 {
-    // TODO: Implement distributed locking mechanism
-    // TODO: Implement pessimistic locking for ticket inventory
-    // TODO: Implement reservation timeout mechanism
+    private readonly ITicketRepository _ticketRepository;
+
+    public ReserveTicketsHandler(ITicketRepository ticketRepository)
+    {
+        _ticketRepository = ticketRepository ?? throw new ArgumentNullException(nameof(ticketRepository));
+    }
+
     public async Task<ReserveTicketsResponse> Handle(ReserveTicketsCommand command, CancellationToken cancellationToken)
     {
-        // Placeholder implementation
-        await Task.Delay(10, cancellationToken);
+        // Check ticket availability
+        var availableTickets = await _ticketRepository.GetAvailableByEventIdAsync(command.EventId, null, cancellationToken);
         
-        // Simulate ticket availability check with locking
+        if (availableTickets.Count() < command.TicketCount)
+        {
+            return new ReserveTicketsResponse(
+                ReservationId: Guid.Empty,
+                ExpiresAt: DateTime.UtcNow,
+                Success: false,
+                ErrorMessage: "Insufficient tickets available"
+            );
+        }
+
+        // Reserve tickets
         var reservationId = Guid.NewGuid();
-        var expiresAt = DateTime.UtcNow.AddMinutes(15);
-        
+        var reservationDuration = TimeSpan.FromMinutes(15);
+        var ticketsToReserve = availableTickets.Take(command.TicketCount);
+
+        foreach (var ticket in ticketsToReserve)
+        {
+            ticket.Reserve(reservationId, reservationDuration);
+            await _ticketRepository.UpdateAsync(ticket, cancellationToken);
+        }
+
         return new ReserveTicketsResponse(
             ReservationId: reservationId,
-            ExpiresAt: expiresAt,
+            ExpiresAt: DateTime.UtcNow.Add(reservationDuration),
             Success: true,
             ErrorMessage: null);
     }

@@ -1,5 +1,6 @@
 using JCP.TicketWave.Shared.Infrastructure.Domain;
 using JCP.TicketWave.CatalogService.Domain.Validators;
+using JCP.TicketWave.CatalogService.Domain.Events;
 
 namespace JCP.TicketWave.CatalogService.Domain.Models;
 
@@ -88,7 +89,7 @@ public class Event : AggregateRoot
             throw new DomainException($"Event validation failed: {errors}");
         }
 
-        return new Event(
+        var eventInstance = new Event(
             tenantId,
             title,
             description,
@@ -101,6 +102,13 @@ public class Event : AggregateRoot
             currency,
             imageUrl,
             externalUrl);
+
+        // Add domain events
+        eventInstance.AddDomainEvent(new EventCreatedDomainEvent(
+            eventInstance.Id, title, description ?? string.Empty, startDateTime, endDateTime, 
+            venueId, categoryId, ticketPrice, currency, availableTickets));
+
+        return eventInstance;
     }
 
     // Business methods
@@ -113,6 +121,9 @@ public class Event : AggregateRoot
         Description = description;
         ImageUrl = imageUrl;
         MarkAsModified();
+
+        // Add domain event
+        AddDomainEvent(new EventUpdatedDomainEvent(Id, title, description ?? string.Empty, StartDateTime, EndDateTime, Currency, TicketPrice, DateTime.UtcNow));
     }
 
     public void UpdateSchedule(DateTime startDateTime, DateTime endDateTime)
@@ -140,8 +151,15 @@ public class Event : AggregateRoot
         if (availableTickets < 0)
             throw new DomainException("Available tickets cannot be negative");
 
+        var wasSoldOut = AvailableTickets == 0;
         AvailableTickets = availableTickets;
         MarkAsModified();
+
+        // Check if event just sold out
+        if (!wasSoldOut && AvailableTickets == 0)
+        {
+            AddDomainEvent(new EventSoldOutDomainEvent(Id, Title, StartDateTime, AvailableTickets, DateTime.UtcNow));
+        }
     }
 
     public void Publish()
@@ -150,15 +168,23 @@ public class Event : AggregateRoot
         {
             Status = EventStatus.Published;
             MarkAsModified();
+
+            // Add domain events
+            AddDomainEvent(new EventPublishedDomainEvent(Id, Title, StartDateTime, EndDateTime, DateTime.UtcNow));
+            AddDomainEvent(new EventCreatedIntegrationEvent(Id, Title, Description ?? string.Empty, StartDateTime, EndDateTime, VenueId, string.Empty, CategoryId, string.Empty, TicketPrice, Currency, AvailableTickets));
         }
     }
 
-    public void Cancel()
+    public void Cancel(string reason = "Event cancelled by organizer")
     {
         if (Status != EventStatus.Completed)
         {
             Status = EventStatus.Cancelled;
             MarkAsModified();
+
+            // Add domain events
+            AddDomainEvent(new EventCancelledDomainEvent(Id, Title, StartDateTime, reason, DateTime.UtcNow));
+            AddDomainEvent(new EventCancelledIntegrationEvent(Id, Title, StartDateTime, reason, DateTime.UtcNow));
         }
     }
 

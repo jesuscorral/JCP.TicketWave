@@ -8,6 +8,7 @@ using JCP.TicketWave.PaymentService.Application.Features.Payments.ProcessPayment
 using JCP.TicketWave.PaymentService.Application.Features.Payments.GetPaymentStatus;
 using JCP.TicketWave.PaymentService.Application.Features.Refunds.ProcessRefund;
 using JCP.TicketWave.PaymentService.Domain.Validators;
+using JCP.TicketWave.Shared.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,10 @@ builder.Services.AddSwaggerGen(c =>
 
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<PaymentValidator>();
+
+// Domain Events
+builder.Services.AddDomainEvents();
+builder.Services.AddDomainEventHandlers(typeof(Program).Assembly);
 
 // Configure SQL Server Database
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

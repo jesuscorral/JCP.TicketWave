@@ -8,6 +8,7 @@ using JCP.TicketWave.BookingService.Application.Features.Bookings.GetBooking;
 using JCP.TicketWave.BookingService.Application.Features.Bookings.CreateBooking;
 using JCP.TicketWave.BookingService.Application.Features.Tickets.ReserveTickets;
 using JCP.TicketWave.BookingService.Domain.Validators;
+using JCP.TicketWave.Shared.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,10 @@ builder.Services.AddSwaggerGen(c =>
 
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<BookingValidator>();
+
+// Domain Events
+builder.Services.AddDomainEvents();
+builder.Services.AddDomainEventHandlers(typeof(Program).Assembly);
 
 // Register handlers for dependency injection
 builder.Services.AddScoped<CreateBookingHandler>();

@@ -4,6 +4,7 @@ public enum TicketStatus
 {
     Available = 0,
     Reserved = 1,
-    Sold = 2,
-    Cancelled = 3
+    Confirmed = 2,
+    Sold = 3,
+    Cancelled = 4
 }

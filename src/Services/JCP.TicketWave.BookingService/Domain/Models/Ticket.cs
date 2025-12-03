@@ -1,8 +1,9 @@
 using JCP.TicketWave.Shared.Infrastructure.Domain;
+using JCP.TicketWave.BookingService.Domain.Events;
 
 namespace JCP.TicketWave.BookingService.Domain.Models;
 
-public class Ticket : BaseEntity
+public class Ticket : AggregateRoot
 {
     public Guid EventId { get; private set; }
     public Guid? BookingId { get; private set; }
@@ -58,6 +59,9 @@ public class Ticket : BaseEntity
         BookingId = bookingId;
         ReservedUntil = DateTime.UtcNow.Add(reservationDuration == default ? TimeSpan.FromMinutes(15) : reservationDuration);
         UpdateTimestamp();
+
+        // Add domain event
+        AddDomainEvent(new TicketReservedDomainEvent(Id, bookingId, EventId, SeatNumber ?? string.Empty, Price, DateTime.UtcNow));
     }
 
     public void Purchase(Guid bookingId)
@@ -68,9 +72,12 @@ public class Ticket : BaseEntity
         if (BookingId != bookingId)
             throw new DomainException("Ticket is reserved for a different booking");
 
-        Status = TicketStatus.Sold;
+        Status = TicketStatus.Confirmed;
         ReservedUntil = null;
         UpdateTimestamp();
+
+        // Add domain event
+        AddDomainEvent(new TicketConfirmedDomainEvent(Id, bookingId, EventId, SeatNumber ?? string.Empty, Price, DateTime.UtcNow));
     }
 
     public void Release()
@@ -81,10 +88,14 @@ public class Ticket : BaseEntity
         if (Status == TicketStatus.Sold)
             throw new DomainException("Cannot release sold ticket");
 
+        var originalBookingId = BookingId ?? Guid.Empty;
         Status = TicketStatus.Available;
         BookingId = null;
         ReservedUntil = null;
         UpdateTimestamp();
+
+        // Add domain event
+        AddDomainEvent(new TicketReservationReleasedDomainEvent(Id, originalBookingId, EventId, SeatNumber ?? string.Empty, DateTime.UtcNow, "Manual release"));
     }
 
     public void Cancel()

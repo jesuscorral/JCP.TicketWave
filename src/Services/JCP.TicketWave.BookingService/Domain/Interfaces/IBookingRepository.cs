@@ -1,5 +1,4 @@
-using JCP.TicketWave.BookingService.Domain.Entities;
-using JCP.TicketWave.BookingService.Domain.Enums;
+using JCP.TicketWave.BookingService.Domain.Models;
 
 namespace JCP.TicketWave.BookingService.Domain.Interfaces;
 

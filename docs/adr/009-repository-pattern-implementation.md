@@ -15,8 +15,8 @@ To complete the architecture defined in previous ADRs, we need to implement a co
 - **Consistency**: Uniform data access patterns across all services
 
 Each service has different persistence needs as defined in ADR-003:
-- **Catalog Service**: Azure Cosmos DB for read-heavy operations
-- **Booking Service**: PostgreSQL for ACID transactions
+- **Catalog Service**: SQL Server for read-heavy operations
+- **Booking Service**: SQL Server for ACID transactions
 - **Payment Service**: SQL Server for financial transactions with audit trail
 
 ## Decision
@@ -40,7 +40,7 @@ public interface IEventRepository
 // Infrastructure implements domain contracts
 public class EventRepository : IEventRepository
 {
-    private readonly CosmosDbService _cosmosDbService;
+    private readonly CatalogDbContext _catalogDbContext;
     
     public async Task<Event> GetByIdAsync(Guid id)
     {
@@ -64,19 +64,19 @@ Domain/
 Infrastructure/
 ├── Data/
 │   ├── Configurations/    # EF Core configurations
-│   ├── Models/           # Document models (Cosmos)
+│   ├── Models/           # Legacy document models (deprecated)
 │   ├── Repositories/     # Repository implementations
 │   └── DbContext.cs      # Database context
 `
 
 ## Technology Mappings
 
-### Catalog Service (Cosmos DB)
-- **Document Models**: CategoryDocument, EventDocument, VenueDocument
-- **Partition Strategy**: Hierarchical partition keys for scalability
-- **Mapping**: Explicit conversion between documents and domain entities
+### Catalog Service (SQL Server)
+- **Entity Models**: Category, Event, Venue entities with EF Core
+- **Schema Strategy**: catalog schema for logical separation
+- **Mapping**: EF Core conventions and configurations
 
-### Booking Service (PostgreSQL)
+### Booking Service (SQL Server)
 - **Entities**: Booking, Ticket with EF Core configurations
 - **Migrations**: Database schema versioning
 - **Concurrency**: Optimistic concurrency with row versioning
@@ -116,9 +116,11 @@ Infrastructure/
 - ✅ **ADR-006 (State Management)**: Transaction boundaries properly handled
 
 ### Implementation Status
-- ✅ **Catalog Service**: Cosmos DB repository with document mapping
-- ✅ **Booking Service**: PostgreSQL repository with EF Core  
-- ✅ **Payment Service**: SQL Server repository with audit capabilities
+- ✅ **Catalog Service**: SQL Server repository with EF Core mapping (catalog schema)
+- ✅ **Booking Service**: SQL Server repository with EF Core (booking schema)  
+- ✅ **Payment Service**: SQL Server repository with audit capabilities (payment schema)
+- ✅ **Central Package Management**: Unified EF Core versions across all repositories
+- ✅ **Database Consolidation**: Single SQL Server instance with schema separation
 - ✅ **All Services**: Domain interfaces defined, infrastructure implemented
 - ✅ **Dependency Injection**: Proper service registration configured
 - ✅ **Database Migrations**: Schema creation and versioning implemented
@@ -127,3 +129,4 @@ Infrastructure/
 - ADR-002: Clean Architecture with Vertical Slices (architectural foundation)
 - ADR-003: Persistence Technologies per Service (technology choices)
 - ADR-006: State Management and Transactions Strategy (transaction handling)
+- ADR-010: Central Package Management Implementation (unified dependency management)

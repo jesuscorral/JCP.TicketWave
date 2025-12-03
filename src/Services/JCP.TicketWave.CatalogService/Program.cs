@@ -1,16 +1,17 @@
-using JCP.TicketWave.CatalogService.Features.Events.GetEvents;
-using JCP.TicketWave.CatalogService.Features.Events.GetEventById;
-using JCP.TicketWave.CatalogService.Features.Categories.GetCategories;
-using JCP.TicketWave.CatalogService.Controllers;
-using JCP.TicketWave.CatalogService.Infrastructure.Data;
-using JCP.TicketWave.CatalogService.Infrastructure.Data.Repositories;
+using Microsoft.EntityFrameworkCore;
+using FluentValidation;
 using JCP.TicketWave.CatalogService.Domain.Interfaces;
-using Microsoft.Azure.Cosmos;
+using JCP.TicketWave.CatalogService.Infrastructure.Persistence;
+using JCP.TicketWave.CatalogService.Infrastructure.Persistence.Repositories;
+using JCP.TicketWave.CatalogService.Application.Controllers;
+using JCP.TicketWave.CatalogService.Application.Features.Events.GetEventById;
+using JCP.TicketWave.CatalogService.Application.Features.Events.GetEvents;
+using JCP.TicketWave.CatalogService.Application.Features.Categories.GetCategories;
+using JCP.TicketWave.CatalogService.Domain.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -26,36 +27,33 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configure Azure Cosmos DB
-var cosmosConnectionString = builder.Configuration.GetConnectionString("CosmosDb");
-if (!string.IsNullOrEmpty(cosmosConnectionString))
+// FluentValidation
+builder.Services.AddValidatorsFromAssemblyContaining<EventValidator>();
+
+// Database configuration - SQL Server with EF Core
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (!string.IsNullOrEmpty(connectionString))
 {
-    builder.Services.AddSingleton(serviceProvider =>
-    {
-        var cosmosClientOptions = new CosmosClientOptions
+    builder.Services.AddDbContext<CatalogDbContext>(options =>
+        options.UseSqlServer(connectionString, sqlOptions =>
         {
-            MaxRetryAttemptsOnRateLimitedRequests = 3,
-            MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(30),
-            ConnectionMode = ConnectionMode.Gateway,
-            MaxRequestsPerTcpConnection = 10,
-            MaxTcpConnectionsPerEndpoint = 16,
-            RequestTimeout = TimeSpan.FromSeconds(30)
-        };
-
-        return new CosmosClient(cosmosConnectionString, cosmosClientOptions);
-    });
-
-    builder.Services.AddSingleton<CosmosDbService>();
-    
-    // Register repository implementations
-    builder.Services.AddScoped<IEventRepository, EventRepository>();
-    builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-    builder.Services.AddScoped<IVenueRepository, VenueRepository>();
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 3,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorNumbersToAdd: null);
+            sqlOptions.CommandTimeout(30);
+            sqlOptions.MigrationsAssembly(typeof(CatalogDbContext).Assembly.FullName);
+        }));
 }
 else
 {
-    throw new InvalidOperationException("CosmosDb connection string is required");
+    throw new InvalidOperationException("DefaultConnection string is required");
 }
+
+// Register repository implementations
+builder.Services.AddScoped<IEventRepository, EventRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IVenueRepository, VenueRepository>();
 
 // Register handlers for dependency injection
 builder.Services.AddScoped<GetEventsHandler>();

@@ -1,11 +1,13 @@
-using JCP.TicketWave.PaymentService.Features.Payments.ProcessPayment;
-using JCP.TicketWave.PaymentService.Features.Payments.GetPaymentStatus;
-using JCP.TicketWave.PaymentService.Features.Refunds.ProcessRefund;
-using JCP.TicketWave.PaymentService.Controllers;
-using JCP.TicketWave.PaymentService.Infrastructure.Data;
-using JCP.TicketWave.PaymentService.Infrastructure.Data.Repositories;
-using JCP.TicketWave.PaymentService.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using FluentValidation;
+using JCP.TicketWave.PaymentService.Domain.Interfaces;
+using JCP.TicketWave.PaymentService.Infrastructure.Persistence;
+using JCP.TicketWave.PaymentService.Infrastructure.Persistence.Repositories;
+using JCP.TicketWave.PaymentService.Application.Controllers;
+using JCP.TicketWave.PaymentService.Application.Features.Payments.ProcessPayment;
+using JCP.TicketWave.PaymentService.Application.Features.Payments.GetPaymentStatus;
+using JCP.TicketWave.PaymentService.Application.Features.Refunds.ProcessRefund;
+using JCP.TicketWave.PaymentService.Domain.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +27,9 @@ builder.Services.AddSwaggerGen(c =>
         return type.Name;
     });
 });
+
+// FluentValidation
+builder.Services.AddValidatorsFromAssemblyContaining<PaymentValidator>();
 
 // Configure SQL Server Database
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

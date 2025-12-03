@@ -13,6 +13,7 @@ This directory contains all important architectural decisions for JCP.TicketWave
 - [ADR-007: Resilience and Fault Tolerance Patterns](007-resilience-patterns.md)
 - [ADR-008: Security and Compliance](008-security-compliance.md)
 - [ADR-009: Repository Pattern Implementation](009-repository-pattern-implementation.md)
+- [ADR-010: Central Package Management Implementation](010-central-package-management.md)
 
 ## ADR Format
 

@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(NetCoreTargetVersion)</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NetArchTest.Rules" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.collector">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Services\JCP.TicketWave.BookingService\JCP.TicketWave.BookingService.csproj" />
+    <ProjectReference Include="..\..\src\Services\JCP.TicketWave.CatalogService\JCP.TicketWave.CatalogService.csproj" />
+    <ProjectReference Include="..\..\src\Services\JCP.TicketWave.PaymentService\JCP.TicketWave.PaymentService.csproj" />
+    <ProjectReference Include="..\..\src\Services\JCP.TicketWave.NotificationService\JCP.TicketWave.NotificationService.csproj" />
+    <ProjectReference Include="..\..\src\Gateway\JCP.TicketWave.Gateway\JCP.TicketWave.Gateway.csproj" />
+    <ProjectReference Include="..\..\src\Shared\JCP.TicketWave.Shared.Contracts\JCP.TicketWave.Shared.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Shared\JCP.TicketWave.Shared.Infrastructure\JCP.TicketWave.Shared.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

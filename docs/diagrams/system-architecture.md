@@ -59,9 +59,7 @@ graph TB
     SharedInfra[🔧 Shared Infrastructure<br/>Repositorios y messaging]
     
     %% Data Stores
-    CatalogDB[(🗄️ Catalog DB<br/>MongoDB/DocumentDB<br/>Read-optimized)]
-    BookingDB[(🗄️ Booking DB<br/>SQL Server<br/>ACID transactions)]
-    PaymentDB[(🗄️ Payment DB<br/>SQL Server<br/>Encrypted)]
+    UnifiedDB[(🗄️ Unified Database<br/>SQL Server<br/>Schemas: catalog/booking/payment)]
     
     %% Message Broker
     MessageBroker[📡 Message Broker<br/>Azure Service Bus<br/>Event-driven comm]
@@ -80,10 +78,10 @@ graph TB
     APIGateway --> PaymentService
     
     %% Service Dependencies
-    CatalogService --> CatalogDB
-    BookingService --> BookingDB
+    CatalogService --> UnifiedDB
+    BookingService --> UnifiedDB
     BookingService --> MessageBroker
-    PaymentService --> PaymentDB
+    PaymentService --> UnifiedDB
     PaymentService --> PaymentGW
     NotificationService --> EmailProvider
     NotificationService --> MessageBroker

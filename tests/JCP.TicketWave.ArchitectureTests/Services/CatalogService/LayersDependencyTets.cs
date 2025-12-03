@@ -34,7 +34,7 @@ public class CleanArchitectureTests : BaseTest
     [Fact]
     public void Application_Should_Not_Depend_On_Infrastructure_Or_Presentation()
     {
-        var result = Types.InAssembly(ApplicationAsseembly)
+        var result = Types.InAssembly(ApplicationAssembly)
             .That()
             .ResideInNamespace("JCP.TicketWave.*.Application..")
             .Should()

@@ -91,16 +91,24 @@ public class PaymentMethodRepository : IPaymentMethodRepository
 
         try
         {
-            // First, unset any existing default for this user
-            await _context.Database.ExecuteSqlRawAsync(
-                "UPDATE PaymentMethods SET IsDefault = 0 WHERE UserId = {0} AND IsDefault = 1",
-                userId);
+            // Unset any existing default for this user
+            var currentDefaults = await _context.PaymentMethods
+                .Where(pm => pm.UserId == userId && pm.IsDefault)
+                .ToListAsync(cancellationToken);
+            foreach (var pm in currentDefaults)
+            {
+                pm.IsDefault = false;
+            }
 
             // Set the specified payment method as default
-            await _context.Database.ExecuteSqlRawAsync(
-                "UPDATE PaymentMethods SET IsDefault = 1 WHERE Id = {0} AND UserId = {1}",
-                paymentMethodId, userId);
+            var newDefault = await _context.PaymentMethods
+                .FirstOrDefaultAsync(pm => pm.Id == paymentMethodId && pm.UserId == userId, cancellationToken);
+            if (newDefault != null)
+            {
+                newDefault.IsDefault = true;
+            }
 
+            await _context.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
         }
         catch
